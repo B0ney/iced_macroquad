@@ -23,7 +23,6 @@ impl Engine {
     pub fn read_events<T: EventProxyHandler>(&self, proxy: &mut EventProxy<T>) {
         macroquad::input::utils::repeat_all_miniquad_input(proxy, self.input_subscriber_id);
     }
-
 }
 
 mod global {
@@ -55,30 +54,11 @@ mod global {
     }
 }
 
-pub trait MessageHandler<Message> {
-    fn add(&mut self, message: Message);
-}
-
-impl<F, Message> MessageHandler<Message> for F
-where
-    F: FnMut(Message),
-{
-    fn add(&mut self, message: Message) {
-        self(message)
-    }
-}
-
-impl<Message> MessageHandler<Message> for &mut Vec<Message> {
-    fn add(&mut self, message: Message) {
-        self.push(message)
-    }
-}
-
 pub struct Iced<Message, Theme = iced_core::Theme> {
     in_events: Vec<iced_core::Event>,
-    messages: Vec<Message>,
     ui_cache: Option<Cache>,
 
+    _message: PhantomData<Message>,
     _theme: PhantomData<Theme>,
 }
 
@@ -86,32 +66,31 @@ impl<Message, Theme> Iced<Message, Theme> {
     pub fn new() -> Self {
         Self {
             in_events: Vec::new(),
-            messages: Vec::new(),
             ui_cache: None,
+            _message: PhantomData,
             _theme: PhantomData,
         }
     }
 
     /// Interact with the UI, sending all messages to the handler.
-    /// 
+    ///
     /// ```rust
     /// use iced_macroquad::widget;
-    /// 
+    ///
     /// enum Message {
     ///     Hi,
     ///     Bye
     /// }
-    /// 
+    ///
     /// let mut messages = Vec::new();
-    /// 
+    ///
     /// ui.interact_with(
     ///     &mut messages,
     ///     widget::button("hello").on_click(Message::Hi)
     /// );
     /// ```
-    pub fn interact_with<'a, M, E>(&mut self, mut handler: M, ui: E)
+    pub fn interact_with<'a, E>(&mut self, mut messages: &mut Vec<Message>, ui: E)
     where
-        M: MessageHandler<Message>,
         E: Into<Element<'a, Message, Theme, ()>>,
     {
         let cache = self.ui_cache.take().unwrap_or_else(Cache::new);
@@ -130,12 +109,8 @@ impl<Message, Theme> Iced<Message, Theme> {
             Cursor::Unavailable,
             renderer,
             &mut clipboard::Null,
-            &mut self.messages,
+            &mut messages,
         );
-
-        for message in self.messages.drain(..) {
-            handler.add(message);
-        }
 
         // TODO: draw interface
 
