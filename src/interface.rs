@@ -1,13 +1,21 @@
 use std::marker::PhantomData;
 
-use crate::event_handler::{EventProxy, EventProxyHandler};
-
-use iced_core::{clipboard, mouse::Cursor, Element, Size};
-use iced_graphics::Viewport;
-use iced_runtime::{
-    user_interface::{self, Cache},
-    UserInterface,
+use crate::{
+    convert,
+    event_handler::{EventProxy, EventProxyHandler},
 };
+
+use iced_core::{
+    clipboard,
+    mouse::{self, Cursor},
+    renderer::Style,
+    Element, Point, Size,
+};
+use iced_graphics::Viewport;
+use iced_runtime::{user_interface::Cache, UserInterface};
+
+use macroquad::{input::mouse_position, window::screen_dpi_scale};
+use miniquad::window::{screen_size, set_mouse_cursor};
 
 struct Engine {
     input_subscriber_id: usize,
@@ -54,7 +62,7 @@ mod global {
     }
 }
 
-pub struct Iced<Message, Theme = iced_core::Theme> {
+pub struct Interface<Message, Theme = iced_core::Theme> {
     in_events: Vec<iced_core::Event>,
     ui_cache: Option<Cache>,
 
@@ -62,7 +70,7 @@ pub struct Iced<Message, Theme = iced_core::Theme> {
     _theme: PhantomData<Theme>,
 }
 
-impl<Message, Theme> Iced<Message, Theme> {
+impl<Message, Theme> Interface<Message, Theme> {
     pub fn new() -> Self {
         Self {
             in_events: Vec::new(),
@@ -89,41 +97,50 @@ impl<Message, Theme> Iced<Message, Theme> {
     ///     widget::button("hello").on_click(Message::Hi)
     /// );
     /// ```
-    pub fn interact_with<'a, E>(&mut self, mut messages: &mut Vec<Message>, ui: E)
+    pub fn interact_with<'a, E>(&mut self, mut messages: &mut Vec<Message>, theme: &Theme, ui: E)
     where
         E: Into<Element<'a, Message, Theme, ()>>,
     {
         let cache = self.ui_cache.take().unwrap_or_else(Cache::new);
 
-        let renderer = &mut ();
+        let renderer = &mut (); // TODO
 
-        // todo: fetch size
-        let viewport = Viewport::with_physical_size(Size::new(640, 480), 1.0);
+        let (width, height) = screen_size();
+        let viewport = Viewport::with_physical_size(
+            Size::new(width as u32, height as u32),
+            screen_dpi_scale() as f64,
+        );
+
         let mut interface = UserInterface::build(ui, viewport.logical_size(), cache, renderer);
 
-        // fetch all inputs
+        // Fetch all inputs
+        self.in_events.clear();
         global::iced_ctx(|ctx| ctx.read_events(&mut EventProxy(&mut self.in_events)));
+
+        let cursor = Cursor::Available(Point::from(mouse_position()));
 
         let (_, _statuses) = interface.update(
             &self.in_events,
-            Cursor::Unavailable,
+            cursor,
             renderer,
             &mut clipboard::Null,
             &mut messages,
         );
 
-        // TODO: draw interface
+        // Draw the interface
+        let interaction = interface.draw(renderer, theme, &Style::default(), cursor);
+        set_mouse_cursor(convert::cursor_icon(interaction));
 
         self.ui_cache = Some(interface.into_cache());
     }
 
     #[must_use = "Messages should be handled."]
-    pub fn interact<'a, E>(&mut self, ui: E) -> Vec<Message>
+    pub fn interact<'a, E>(&mut self, theme: &Theme, ui: E) -> Vec<Message>
     where
         E: Into<Element<'a, Message, Theme, ()>>,
     {
         let mut messages = Vec::new();
-        self.interact_with(&mut messages, ui);
+        self.interact_with(&mut messages, theme, ui);
         messages
     }
 

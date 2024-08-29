@@ -1,7 +1,6 @@
-use iced_macroquad::{
-    widget::{self, Theme},
-    Iced,
-};
+use iced_macroquad::widget::{button, row, text, Theme};
+use iced_macroquad::Interface;
+
 use macroquad::prelude::*;
 
 #[derive(Debug, Clone)]
@@ -12,24 +11,33 @@ enum Message {
 
 #[macroquad::main("macroqaud with iced")]
 async fn main() {
-    let mut ui: Iced<Message> = Iced::new();
+    let mut ui: Interface<Message> = Interface::new();
+    let theme = Theme::Dark;
     let mut messages: Vec<Message> = Vec::new();
+
     let mut counter = 0;
 
     loop {
         ui.interact_with(
             &mut messages,
-            widget::row![
-                widget::button("Add").on_press(Message::Add),
-                widget::text(counter),
-                widget::button("Sub").on_press(Message::Sub),
+            &theme,
+            row![
+                button("Add").width(32).height(16).on_press(Message::Add),
+                text(counter).width(32),
+                button("Sub").width(32).height(16).on_press(Message::Sub),
             ],
         );
 
         for message in messages.drain(..) {
             match message {
-                Message::Add => counter += 1,
-                Message::Sub => counter -= 1,
+                Message::Add => {
+                    println!("Increment");
+                    counter += 1
+                }
+                Message::Sub => {
+                    println!("decrement");
+                    counter -= 1
+                }
             }
         }
 

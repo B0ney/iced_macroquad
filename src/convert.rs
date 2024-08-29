@@ -1,4 +1,4 @@
-use miniquad as mq;
+use miniquad::{self as mq, CursorIcon};
 
 use iced_core::{
     keyboard::{self, key::Named, Key, Location, Modifiers},
@@ -214,5 +214,21 @@ pub fn touch(phase: miniquad::TouchPhase, id: u64, x: f32, y: f32) -> touch::Eve
         miniquad::TouchPhase::Moved => touch::Event::FingerMoved { id, position },
         miniquad::TouchPhase::Ended => touch::Event::FingerLifted { id, position },
         miniquad::TouchPhase::Cancelled => touch::Event::FingerLost { id, position },
+    }
+}
+
+pub fn cursor_icon(icon: mouse::Interaction) -> CursorIcon {
+    match icon {
+        mouse::Interaction::None => CursorIcon::Default,
+        mouse::Interaction::Idle => CursorIcon::Default,
+        mouse::Interaction::Pointer => CursorIcon::Pointer,
+        mouse::Interaction::Grab => CursorIcon::Move,
+        mouse::Interaction::Text => CursorIcon::Text,
+        mouse::Interaction::Crosshair => CursorIcon::Crosshair,
+        mouse::Interaction::Working => CursorIcon::Wait,
+        mouse::Interaction::ResizingHorizontally => CursorIcon::EWResize,
+        mouse::Interaction::ResizingVertically => CursorIcon::NSResize,
+        mouse::Interaction::NotAllowed => CursorIcon::NotAllowed,
+        mouse::Interaction::ZoomIn | mouse::Interaction::Grabbing => CursorIcon::Default,
     }
 }

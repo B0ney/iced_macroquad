@@ -1,5 +1,5 @@
-use iced_core::{keyboard, mouse, window, Event, Point, Size};
 use crate::convert;
+use iced_core::{keyboard, mouse, window, Event, Point, Size};
 
 pub trait EventProxyHandler {
     fn add(&mut self, event: Event);
