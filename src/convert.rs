@@ -1,10 +1,9 @@
-use iced_graphics::text::cosmic_text::ttf_parser::name::{self, Name};
 use miniquad as mq;
 
 use iced_core::{
-    keyboard::{self, key::Named, Key},
+    keyboard::{self, key::Named, Key, Location, Modifiers},
     mouse::{self, Button},
-    touch, window,
+    touch, window, Point,
 };
 
 /// miniquad sends special keys (backspace, delete, F1, ...) as characters.
@@ -38,8 +37,46 @@ fn named(n: Named) -> Key {
     Key::Named(n)
 }
 
-pub fn key(key: mq::KeyCode) -> Key {
-    match key {
+pub fn key_mod(md: mq::KeyMods) -> Modifiers {
+    let flag = |modifier: Modifiers, set: bool| -> Modifiers {
+        match set {
+            true => modifier,
+            false => Modifiers::empty(),
+        }
+    };
+
+    Modifiers::empty()
+        | flag(Modifiers::SHIFT, md.shift)
+        | flag(Modifiers::CTRL, md.ctrl)
+        | flag(Modifiers::ALT, md.alt)
+        | flag(Modifiers::LOGO, md.logo)
+}
+
+pub fn key(key: mq::KeyCode) -> (Key, Location) {
+    let mut location = Location::Standard;
+    let l = &mut location;
+
+    let char_numpad = |key: &str, location: &mut Location| -> Key {
+        *location = Location::Numpad;
+        char(key)
+    };
+
+    let named_numpad = |n: Named, location: &mut Location| -> Key {
+        *location = Location::Numpad;
+        named(n)
+    };
+
+    let named_left = |n: Named, location: &mut Location| -> Key {
+        *location = Location::Left;
+        named(n)
+    };
+
+    let named_right = |n: Named, location: &mut Location| -> Key {
+        *location = Location::Right;
+        named(n)
+    };
+
+    let key = match key {
         miniquad::KeyCode::Space => named(Named::Space),
         miniquad::KeyCode::Apostrophe => char("'"),
         miniquad::KeyCode::Comma => char(","),
@@ -135,33 +172,47 @@ pub fn key(key: mq::KeyCode) -> Key {
         miniquad::KeyCode::F24 => named(Named::F24),
         miniquad::KeyCode::F25 => named(Named::F25),
 
-        miniquad::KeyCode::Kp0 => char("0"),
-        miniquad::KeyCode::Kp1 => char("1"),
-        miniquad::KeyCode::Kp2 => char("2"),
-        miniquad::KeyCode::Kp3 => char("3"),
-        miniquad::KeyCode::Kp4 => char("4"),
-        miniquad::KeyCode::Kp5 => char("5"),
-        miniquad::KeyCode::Kp6 => char("6"),
-        miniquad::KeyCode::Kp7 => char("7"),
-        miniquad::KeyCode::Kp8 => char("8"),
-        miniquad::KeyCode::Kp9 => char("9"),
+        miniquad::KeyCode::Kp0 => char_numpad("0", l),
+        miniquad::KeyCode::Kp1 => char_numpad("1", l),
+        miniquad::KeyCode::Kp2 => char_numpad("2", l),
+        miniquad::KeyCode::Kp3 => char_numpad("3", l),
+        miniquad::KeyCode::Kp4 => char_numpad("4", l),
+        miniquad::KeyCode::Kp5 => char_numpad("5", l),
+        miniquad::KeyCode::Kp6 => char_numpad("6", l),
+        miniquad::KeyCode::Kp7 => char_numpad("7", l),
+        miniquad::KeyCode::Kp8 => char_numpad("8", l),
+        miniquad::KeyCode::Kp9 => char_numpad("9", l),
 
-        miniquad::KeyCode::KpDecimal => char("."),
-        miniquad::KeyCode::KpDivide => char("/"),
-        miniquad::KeyCode::KpMultiply => char("*"),
-        miniquad::KeyCode::KpSubtract => char("-"),
-        miniquad::KeyCode::KpAdd => char("+"),
-        miniquad::KeyCode::KpEnter => named(Named::Enter),
-        miniquad::KeyCode::KpEqual => char("="),
-        miniquad::KeyCode::LeftShift => named(Named::Shift),
-        miniquad::KeyCode::LeftControl => named(Named::Control),
-        miniquad::KeyCode::LeftAlt => named(Named::Alt),
-        miniquad::KeyCode::LeftSuper => named(Named::Super),
-        miniquad::KeyCode::RightShift => named(Named::Shift),
-        miniquad::KeyCode::RightControl => named(Named::Control),
-        miniquad::KeyCode::RightAlt => named(Named::Alt),
-        miniquad::KeyCode::RightSuper => named(Named::Super),
+        miniquad::KeyCode::KpDecimal => char_numpad(".", l),
+        miniquad::KeyCode::KpDivide => char_numpad("/", l),
+        miniquad::KeyCode::KpMultiply => char_numpad("*", l),
+        miniquad::KeyCode::KpSubtract => char_numpad("-", l),
+        miniquad::KeyCode::KpAdd => char_numpad("+", l),
+        miniquad::KeyCode::KpEnter => named_numpad(Named::Enter, l),
+        miniquad::KeyCode::KpEqual => char_numpad("=", l),
+        miniquad::KeyCode::LeftShift => named_left(Named::Shift, l),
+        miniquad::KeyCode::LeftControl => named_left(Named::Control, l),
+        miniquad::KeyCode::LeftAlt => named_left(Named::Alt, l),
+        miniquad::KeyCode::LeftSuper => named_left(Named::Super, l),
+        miniquad::KeyCode::RightShift => named_right(Named::Shift, l),
+        miniquad::KeyCode::RightControl => named_right(Named::Control, l),
+        miniquad::KeyCode::RightAlt => named_right(Named::Alt, l),
+        miniquad::KeyCode::RightSuper => named_right(Named::Super, l),
         miniquad::KeyCode::Unknown => Key::Unidentified,
         _ => Key::Unidentified,
+    };
+
+    (key, location)
+}
+
+pub fn touch(phase: miniquad::TouchPhase, id: u64, x: f32, y: f32) -> touch::Event {
+    let id = touch::Finger(id);
+    let position = Point::new(x, y);
+
+    match phase {
+        miniquad::TouchPhase::Started => touch::Event::FingerPressed { id, position },
+        miniquad::TouchPhase::Moved => touch::Event::FingerMoved { id, position },
+        miniquad::TouchPhase::Ended => touch::Event::FingerLifted { id, position },
+        miniquad::TouchPhase::Cancelled => touch::Event::FingerLost { id, position },
     }
 }

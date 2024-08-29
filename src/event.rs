@@ -1,4 +1,4 @@
-use iced_core::{keyboard, mouse, touch, window, Event};
+use iced_core::{keyboard, mouse, touch, window, Event, Point, Size};
 
 use crate::convert;
 
@@ -21,17 +21,27 @@ impl<T: EventHandlerProxy> EventHandlerProxy for EventChannel<T> {
 }
 
 impl<T: EventHandlerProxy> miniquad::EventHandler for EventChannel<T> {
-    fn update(&mut self) {
-        todo!()
-    }
+    fn update(&mut self) {}
 
     fn draw(&mut self) {}
 
-    fn resize_event(&mut self, _width: f32, _height: f32) {}
+    fn resize_event(&mut self, width: f32, height: f32) {
+        self.add(Event::Window(window::Event::Resized(Size::new(
+            width, height,
+        ))))
+    }
 
-    fn mouse_motion_event(&mut self, _x: f32, _y: f32) {}
+    fn mouse_motion_event(&mut self, x: f32, y: f32) {
+        self.add(Event::Mouse(mouse::Event::CursorMoved {
+            position: Point::new(x, y),
+        }))
+    }
 
-    fn mouse_wheel_event(&mut self, _x: f32, _y: f32) {}
+    fn mouse_wheel_event(&mut self, x: f32, y: f32) {
+        self.add(Event::Mouse(mouse::Event::WheelScrolled {
+            delta: mouse::ScrollDelta::Pixels { x, y },
+        }))
+    }
 
     fn mouse_button_down_event(&mut self, button: miniquad::MouseButton, _x: f32, _y: f32) {
         if let Some(button) = convert::mouse_button(button) {
@@ -49,27 +59,30 @@ impl<T: EventHandlerProxy> miniquad::EventHandler for EventChannel<T> {
 
     fn key_down_event(
         &mut self,
-        _keycode: miniquad::KeyCode,
-        _keymods: miniquad::KeyMods,
+        keycode: miniquad::KeyCode,
+        keymods: miniquad::KeyMods,
         _repeat: bool,
     ) {
-
+        let (key, location) = convert::key(keycode);
+        self.add(Event::Keyboard(keyboard::Event::KeyPressed {
+            key,
+            location,
+            modifiers: convert::key_mod(keymods),
+            text: None,
+        }))
     }
 
-    fn key_up_event(&mut self, _keycode: miniquad::KeyCode, _keymods: miniquad::KeyMods) {}
+    fn key_up_event(&mut self, keycode: miniquad::KeyCode, keymods: miniquad::KeyMods) {
+        let (key, location) = convert::key(keycode);
+        self.add(Event::Keyboard(keyboard::Event::KeyReleased {
+            key,
+            location,
+            modifiers: convert::key_mod(keymods),
+        }))
+    }
 
-    fn touch_event(&mut self, phase: miniquad::TouchPhase, _id: u64, x: f32, y: f32) {
-        if phase == miniquad::TouchPhase::Started {
-            self.mouse_button_down_event(miniquad::MouseButton::Left, x, y);
-        }
-
-        if phase == miniquad::TouchPhase::Ended {
-            self.mouse_button_up_event(miniquad::MouseButton::Left, x, y);
-        }
-
-        if phase == miniquad::TouchPhase::Moved {
-            self.mouse_motion_event(x, y);
-        }
+    fn touch_event(&mut self, phase: miniquad::TouchPhase, id: u64, x: f32, y: f32) {
+        self.add(Event::Touch(convert::touch(phase, id, x, y)));
     }
 
     fn raw_mouse_motion(&mut self, _dx: f32, _dy: f32) {}
@@ -78,9 +91,7 @@ impl<T: EventHandlerProxy> miniquad::EventHandler for EventChannel<T> {
         self.add(Event::Window(window::Event::Closed))
     }
 
-    fn window_restored_event(&mut self) {
-
-    }
+    fn window_restored_event(&mut self) {}
 
     fn quit_requested_event(&mut self) {
         self.add(Event::Window(window::Event::CloseRequested))
