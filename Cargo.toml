@@ -3,12 +3,21 @@ name = "iced_macroquad"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
-miniquad = "0.4.6"
-macroquad = "0.4.13"
+# [workspace]
+# members = ["runtime"]
 
-iced_runtime = { git = "https://github.com/iced-rs/iced" }
+[workspace.dependencies]
 iced_core = { git = "https://github.com/iced-rs/iced" }
 iced_graphics = { git = "https://github.com/iced-rs/iced" }
 iced_widget = { git = "https://github.com/iced-rs/iced" }
+# iced_mq_runtime = { path = "runtime" }
+iced_runtime = { git = "https://github.com/iced-rs/iced" }
 
+macroquad = "0.4.13"
+
+[dependencies]
+macroquad.workspace = true
+iced_graphics.workspace = true
+iced_core.workspace = true
+iced_widget.workspace = true
+iced_runtime.workspace = true

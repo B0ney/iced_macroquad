@@ -431,7 +431,6 @@ dependencies = [
  "iced_runtime",
  "iced_widget",
  "macroquad",
- "miniquad",
 ]
 
 [[package]]
