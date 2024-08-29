@@ -1,10 +1,8 @@
 use miniquad::{self as mq, CursorIcon};
 
-use iced_core::{
-    keyboard::{self, key::Named, Key, Location, Modifiers},
-    mouse::{self, Button},
-    touch, window, Point,
-};
+use iced_core::keyboard::{key::Named, Key, Location, Modifiers};
+use iced_core::mouse::{Button, Interaction};
+use iced_core::{touch, Point};
 
 /// miniquad sends special keys (backspace, delete, F1, ...) as characters.
 /// Ignore those.
@@ -217,18 +215,18 @@ pub fn touch(phase: miniquad::TouchPhase, id: u64, x: f32, y: f32) -> touch::Eve
     }
 }
 
-pub fn cursor_icon(icon: mouse::Interaction) -> CursorIcon {
+pub fn cursor_icon(icon: Interaction) -> CursorIcon {
     match icon {
-        mouse::Interaction::None => CursorIcon::Default,
-        mouse::Interaction::Idle => CursorIcon::Default,
-        mouse::Interaction::Pointer => CursorIcon::Pointer,
-        mouse::Interaction::Grab => CursorIcon::Move,
-        mouse::Interaction::Text => CursorIcon::Text,
-        mouse::Interaction::Crosshair => CursorIcon::Crosshair,
-        mouse::Interaction::Working => CursorIcon::Wait,
-        mouse::Interaction::ResizingHorizontally => CursorIcon::EWResize,
-        mouse::Interaction::ResizingVertically => CursorIcon::NSResize,
-        mouse::Interaction::NotAllowed => CursorIcon::NotAllowed,
-        mouse::Interaction::ZoomIn | mouse::Interaction::Grabbing => CursorIcon::Default,
+        Interaction::None => CursorIcon::Default,
+        Interaction::Idle => CursorIcon::Default,
+        Interaction::Pointer => CursorIcon::Pointer,
+        Interaction::Grab => CursorIcon::Move,
+        Interaction::Text => CursorIcon::Text,
+        Interaction::Crosshair => CursorIcon::Crosshair,
+        Interaction::Working => CursorIcon::Wait,
+        Interaction::ResizingHorizontally => CursorIcon::EWResize,
+        Interaction::ResizingVertically => CursorIcon::NSResize,
+        Interaction::NotAllowed => CursorIcon::NotAllowed,
+        Interaction::ZoomIn | Interaction::Grabbing => CursorIcon::Default,
     }
 }

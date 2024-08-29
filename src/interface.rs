@@ -65,19 +65,29 @@ mod global {
 pub struct Interface<Message, Theme = iced_core::Theme> {
     in_events: Vec<iced_core::Event>,
     ui_cache: Option<Cache>,
+    theme: Theme,
 
     _message: PhantomData<Message>,
-    _theme: PhantomData<Theme>,
+}
+
+impl<Message, Theme: Default> Interface<Message, Theme> {
+    pub fn new() -> Self {
+        Self::new_themed(Theme::default())
+    }
 }
 
 impl<Message, Theme> Interface<Message, Theme> {
-    pub fn new() -> Self {
+    pub fn new_themed(theme: Theme) -> Self {
         Self {
             in_events: Vec::new(),
             ui_cache: None,
+            theme,
             _message: PhantomData,
-            _theme: PhantomData,
         }
+    }
+
+    pub fn set_theme(&mut self, theme: Theme) {
+        self.theme = theme
     }
 
     /// Interact with the UI, sending all messages to the handler.
@@ -97,7 +107,7 @@ impl<Message, Theme> Interface<Message, Theme> {
     ///     widget::button("hello").on_click(Message::Hi)
     /// );
     /// ```
-    pub fn interact_with<'a, E>(&mut self, mut messages: &mut Vec<Message>, theme: &Theme, ui: E)
+    pub fn interact_with<'a, E>(&mut self, mut messages: &mut Vec<Message>, ui: E)
     where
         E: Into<Element<'a, Message, Theme, ()>>,
     {
@@ -128,19 +138,19 @@ impl<Message, Theme> Interface<Message, Theme> {
         );
 
         // Draw the interface
-        let interaction = interface.draw(renderer, theme, &Style::default(), cursor);
+        let interaction = interface.draw(renderer, &self.theme, &Style::default(), cursor);
         set_mouse_cursor(convert::cursor_icon(interaction));
 
         self.ui_cache = Some(interface.into_cache());
     }
 
     #[must_use = "Messages should be handled."]
-    pub fn interact<'a, E>(&mut self, theme: &Theme, ui: E) -> Vec<Message>
+    pub fn interact<'a, E>(&mut self, ui: E) -> Vec<Message>
     where
         E: Into<Element<'a, Message, Theme, ()>>,
     {
         let mut messages = Vec::new();
-        self.interact_with(&mut messages, theme, ui);
+        self.interact_with(&mut messages, ui);
         messages
     }
 

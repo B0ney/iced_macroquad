@@ -11,16 +11,13 @@ enum Message {
 
 #[macroquad::main("macroqaud with iced")]
 async fn main() {
-    let mut ui: Interface<Message> = Interface::new();
-    let theme = Theme::Dark;
-    let mut messages: Vec<Message> = Vec::new();
-
+    let mut ui = Interface::<Message>::new();
+    let mut messages = Vec::new();
     let mut counter = 0;
 
     loop {
         ui.interact_with(
             &mut messages,
-            &theme,
             row![
                 button("Add").width(32).height(16).on_press(Message::Add),
                 text(counter).width(32),
