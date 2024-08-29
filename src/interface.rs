@@ -1,16 +1,11 @@
 use std::marker::PhantomData;
 
-use crate::{
-    convert,
-    event_handler::{EventProxy, EventProxyHandler},
-};
+use crate::convert;
+use crate::event_handler::{EventProxy, EventProxyHandler};
 
-use iced_core::{
-    clipboard,
-    mouse::{self, Cursor},
-    renderer::Style,
-    Element, Point, Size,
-};
+use iced_core::mouse::Cursor;
+use iced_core::renderer::Style;
+use iced_core::{clipboard, Element, Point, Size};
 use iced_graphics::Viewport;
 use iced_runtime::{user_interface::Cache, UserInterface};
 
@@ -66,7 +61,6 @@ pub struct Interface<Message, Theme = iced_core::Theme> {
     in_events: Vec<iced_core::Event>,
     ui_cache: Option<Cache>,
     theme: Theme,
-
     _message: PhantomData<Message>,
 }
 
@@ -139,6 +133,8 @@ impl<Message, Theme> Interface<Message, Theme> {
 
         // Draw the interface
         let interaction = interface.draw(renderer, &self.theme, &Style::default(), cursor);
+        
+        // Update cursor icon.
         set_mouse_cursor(convert::cursor_icon(interaction));
 
         self.ui_cache = Some(interface.into_cache());
