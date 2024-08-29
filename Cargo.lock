@@ -429,8 +429,19 @@ dependencies = [
  "iced_core",
  "iced_graphics",
  "iced_runtime",
+ "iced_widget",
  "macroquad",
  "miniquad",
+]
+
+[[package]]
+name = "iced_renderer"
+version = "0.13.0-dev"
+source = "git+https://github.com/iced-rs/iced#043f0302142e46bf1d7ba2015f83261813280fec"
+dependencies = [
+ "iced_graphics",
+ "log",
+ "thiserror",
 ]
 
 [[package]]
@@ -443,6 +454,20 @@ dependencies = [
  "iced_futures",
  "raw-window-handle",
  "thiserror",
+]
+
+[[package]]
+name = "iced_widget"
+version = "0.13.0-dev"
+source = "git+https://github.com/iced-rs/iced#043f0302142e46bf1d7ba2015f83261813280fec"
+dependencies = [
+ "iced_renderer",
+ "iced_runtime",
+ "num-traits",
+ "once_cell",
+ "rustc-hash 2.0.0",
+ "thiserror",
+ "unicode-segmentation",
 ]
 
 [[package]]

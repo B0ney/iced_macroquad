@@ -5,9 +5,10 @@ edition = "2021"
 
 [dependencies]
 miniquad = "0.4.6"
-iced_runtime = {git ="https://github.com/iced-rs/iced"}
-iced_core = {git ="https://github.com/iced-rs/iced" }
-iced_graphics = {git ="https://github.com/iced-rs/iced" }
 macroquad = "0.4.13"
 
+iced_runtime = { git = "https://github.com/iced-rs/iced" }
+iced_core = { git = "https://github.com/iced-rs/iced" }
+iced_graphics = { git = "https://github.com/iced-rs/iced" }
+iced_widget = { git = "https://github.com/iced-rs/iced" }
 

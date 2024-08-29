@@ -1,26 +1,34 @@
-use iced_core::{keyboard, mouse, touch, window, Event, Point, Size};
-
+use iced_core::{keyboard, mouse, window, Event, Point, Size};
 use crate::convert;
 
-pub trait EventHandlerProxy {
+pub trait EventProxyHandler {
     fn add(&mut self, event: Event);
 }
 
-impl EventHandlerProxy for &mut Vec<Event> {
+impl EventProxyHandler for &mut Vec<Event> {
     fn add(&mut self, event: Event) {
         self.push(event)
     }
 }
 
-pub struct EventChannel<T: EventHandlerProxy>(pub T);
+pub struct EventProxy<T: EventProxyHandler>(pub T);
 
-impl<T: EventHandlerProxy> EventHandlerProxy for EventChannel<T> {
+impl<T: EventProxyHandler> EventProxyHandler for EventProxy<T> {
     fn add(&mut self, event: Event) {
         self.0.add(event)
     }
 }
 
-impl<T: EventHandlerProxy> miniquad::EventHandler for EventChannel<T> {
+impl<F> EventProxyHandler for F
+where
+    F: FnMut(Event),
+{
+    fn add(&mut self, event: Event) {
+        self(event)
+    }
+}
+
+impl<T: EventProxyHandler> miniquad::EventHandler for EventProxy<T> {
     fn update(&mut self) {}
 
     fn draw(&mut self) {}
@@ -97,7 +105,5 @@ impl<T: EventHandlerProxy> miniquad::EventHandler for EventChannel<T> {
         self.add(Event::Window(window::Event::CloseRequested))
     }
 
-    fn files_dropped_event(&mut self) {
-        // self.add(Event::Window(window::Event::))
-    }
+    fn files_dropped_event(&mut self) {}
 }
