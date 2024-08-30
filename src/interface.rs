@@ -112,12 +112,13 @@ impl<Message, Theme> Interface<Message, Theme> {
         self.ui_cache = Some(interface.into_cache());
     }
 
+    /// Interacting with the UI will update the mouse icon
+    pub fn update_cursor(&self) {
+        set_mouse_cursor(convert::cursor_icon(self.mouse_icon));
+    }
+
     /// Present the UI
     pub fn present(&mut self) {
-        if self.mouse_icon != Interaction::None {
-            set_mouse_cursor(convert::cursor_icon(self.mouse_icon));
-        }
-
         global::iced_ctx_mut(|ctx| self.canvas.present(&mut ctx.engine))
     }
 }

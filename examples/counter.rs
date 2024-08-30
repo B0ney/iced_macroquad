@@ -38,6 +38,7 @@ async fn main() {
             }
         }
 
+        ui.update_cursor();
         ui.present();
 
         next_frame().await
