@@ -1,32 +1,32 @@
+pub mod engine;
 mod layer;
-pub mod state;
 pub mod quad;
 
+use engine::Engine;
 use iced_core::renderer::Quad;
 use iced_core::{Background, Color, Font, Pixels, Point, Rectangle, Transformation};
-use macroquad::miniquad::Context;
-use state::State;
 
-
-pub struct Renderer {
-    state: State,
+#[derive(Debug)]
+pub struct Canvas {
     layers: layer::Stack,
+    // todo: storage
 }
 
-impl Renderer {
-    pub fn new(ctx: &mut Context) -> Self {
+impl Canvas {
+    pub fn new() -> Self {
         Self {
-            state: State::new(ctx),
             layers: layer::Stack::new(),
         }
     }
 
-    pub fn present(&mut self) {
-
+    pub fn present(&mut self, engine: &mut Engine) {
+        for layer in self.layers.iter_mut() {
+            
+        }
     }
 }
 
-impl iced_core::Renderer for Renderer {
+impl iced_core::Renderer for Canvas {
     fn start_layer(&mut self, bounds: Rectangle) {
         self.layers.push_clip(bounds);
     }
@@ -53,7 +53,7 @@ impl iced_core::Renderer for Renderer {
     }
 }
 
-impl iced_core::text::Renderer for Renderer {
+impl iced_core::text::Renderer for Canvas {
     type Font = Font;
     type Paragraph = ();
     type Editor = ();

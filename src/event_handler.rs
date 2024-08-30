@@ -2,25 +2,17 @@ use crate::convert;
 use iced_core::{keyboard, mouse, window, Event, Point, Size};
 use macroquad::miniquad;
 
-pub trait EventProxyHandler {
+pub trait EventProxy {
     fn add(&mut self, event: Event);
 }
 
-impl EventProxyHandler for &mut Vec<Event> {
+impl EventProxy for &mut Vec<Event> {
     fn add(&mut self, event: Event) {
         self.push(event)
     }
 }
 
-pub struct EventProxy<T: EventProxyHandler>(pub T);
-
-impl<T: EventProxyHandler> EventProxyHandler for EventProxy<T> {
-    fn add(&mut self, event: Event) {
-        self.0.add(event)
-    }
-}
-
-impl<F> EventProxyHandler for F
+impl<F> EventProxy for F
 where
     F: FnMut(Event),
 {
@@ -29,7 +21,15 @@ where
     }
 }
 
-impl<T: EventProxyHandler> miniquad::EventHandler for EventProxy<T> {
+pub struct EventProxyWrapper<T: EventProxy>(pub T);
+
+impl<T: EventProxy> EventProxy for EventProxyWrapper<T> {
+    fn add(&mut self, event: Event) {
+        self.0.add(event)
+    }
+}
+
+impl<T: EventProxy> miniquad::EventHandler for EventProxyWrapper<T> {
     fn update(&mut self) {}
 
     fn draw(&mut self) {}

@@ -2,14 +2,14 @@ use std::marker::PhantomData;
 
 use iced_core::mouse::Cursor;
 use iced_core::renderer::Style;
-use iced_core::{clipboard, Element, Point};
+use iced_core::{clipboard, Element, Point, Size};
+use iced_graphics::Viewport;
 use iced_runtime::{user_interface::Cache, UserInterface};
 
 use macroquad::input::mouse_position;
-use macroquad::miniquad::window::set_mouse_cursor;
+use macroquad::miniquad::window::{dpi_scale, screen_size, set_mouse_cursor};
 
-use crate::engine::{global, Engine};
-use crate::event_handler::EventProxy;
+use crate::context::{global, Context};
 use crate::{convert, Renderer};
 
 pub struct Interface<Message, Theme = iced_core::Theme> {
@@ -73,35 +73,34 @@ impl<Message, Theme> Interface<Message, Theme> {
         messages
     }
 
-    fn update<'a>(
+    fn update(
         &mut self,
-        ctx: &mut Engine,
+        ctx: &mut Context,
         messages: &mut Vec<Message>,
-        ui: Element<'a, Message, Theme, Renderer>,
+        ui: Element<'_, Message, Theme, Renderer>,
     ) {
-        let cache = self.ui_cache.take().unwrap_or_else(Cache::new);
-
-        let viewport = ctx.fetch_viewport();
+        let cache = self.ui_cache.take().unwrap_or_default();
+        let viewport = fetch_viewport();
+        let cursor = fetch_cursor();
 
         // Fetch all inputs
         self.in_events.clear();
-        ctx.read_events(&mut EventProxy(&mut self.in_events));
+        ctx.read_events(&mut self.in_events);
 
-        let renderer = &mut ctx.renderer;
-        let cursor = Cursor::Available(Point::from(mouse_position()));
+        let canvas = ctx.fetch_canvas::<Message>();
 
-        let mut interface = UserInterface::build(ui, viewport.logical_size(), cache, renderer);
+        let mut interface = UserInterface::build(ui, viewport.logical_size(), cache, canvas);
 
         let (_, _statuses) = interface.update(
             &self.in_events,
             cursor,
-            renderer,
+            canvas,
             &mut clipboard::Null,
             messages,
         );
 
         // Draw the interface
-        let interaction = interface.draw(renderer, &self.theme, &Style::default(), cursor);
+        let interaction = interface.draw(canvas, &self.theme, &Style::default(), cursor);
 
         // Update cursor icon.
         set_mouse_cursor(convert::cursor_icon(interaction));
@@ -111,8 +110,15 @@ impl<Message, Theme> Interface<Message, Theme> {
 
     /// Present the UI
     pub fn present(&mut self) {
-        global::iced_ctx_mut(|ctx| {
-            ctx.renderer.present()
-        })
+        global::iced_ctx_mut(|ctx| ctx.present::<Message>())
     }
+}
+
+fn fetch_viewport() -> Viewport {
+    let (width, height) = screen_size();
+    Viewport::with_physical_size(Size::new(width as u32, height as u32), dpi_scale() as f64)
+}
+
+fn fetch_cursor() -> Cursor {
+    Cursor::Available(Point::from(mouse_position()))
 }

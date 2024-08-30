@@ -9,7 +9,5 @@ impl State {
         Self {}
     }
 
-    pub fn draw(ctx: &mut Context) {
-        
-    }
+    pub fn draw(ctx: &mut Context) {}
 }

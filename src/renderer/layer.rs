@@ -17,14 +17,15 @@ impl Layer {
         background: Background,
         transformation: Transformation,
     ) {
-
     }
 }
 
-
 impl iced_graphics::Layer for Layer {
     fn with_bounds(bounds: Rectangle) -> Self {
-        Self { bounds, ..Default::default()}
+        Self {
+            bounds,
+            ..Default::default()
+        }
     }
 
     fn flush(&mut self) {
