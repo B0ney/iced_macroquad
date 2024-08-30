@@ -127,15 +127,21 @@ impl<Message, Theme> Interface<Message, Theme> {
             MouseInteraction::None => {}
             MouseInteraction::Some(icon) => set_mouse_cursor(convert::cursor_icon(icon)),
             MouseInteraction::Reset => {
-                set_mouse_cursor(CursorIcon::Default);
                 self.interaction = MouseInteraction::None;
+                set_mouse_cursor(CursorIcon::Default);
             }
         }
     }
 
+    /// Present the UI without updating the cursor.
+    pub fn present_without_cursor(&mut self) {
+        global::iced_ctx_mut(|ctx| self.canvas.present(&mut ctx.engine))
+    }
+
     /// Present the UI
     pub fn present(&mut self) {
-        global::iced_ctx_mut(|ctx| self.canvas.present(&mut ctx.engine))
+        self.update_cursor();
+        self.present_without_cursor()
     }
 }
 

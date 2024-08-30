@@ -1,4 +1,4 @@
-use iced_macroquad::widget::{button, row, text, Theme};
+use iced_macroquad::widget::{button, row, text};
 use iced_macroquad::Interface;
 
 use macroquad::prelude::*;
@@ -38,7 +38,6 @@ async fn main() {
             }
         }
 
-        ui.update_cursor();
         ui.present();
 
         next_frame().await
