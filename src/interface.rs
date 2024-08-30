@@ -8,6 +8,7 @@ use iced_runtime::{user_interface::Cache, UserInterface};
 
 use macroquad::input::mouse_position;
 use macroquad::miniquad::window::{dpi_scale, screen_size, set_mouse_cursor};
+use macroquad::miniquad::CursorIcon;
 
 use crate::context::{global, Context};
 use crate::renderer::Canvas;
@@ -18,7 +19,7 @@ pub struct Interface<Message, Theme = iced_core::Theme> {
     ui_cache: Option<Cache>,
     canvas: Canvas,
     theme: Theme,
-    mouse_icon: Interaction,
+    interaction: MouseInteraction,
     _message: PhantomData<Message>,
 }
 
@@ -35,7 +36,7 @@ impl<Message, Theme> Interface<Message, Theme> {
             ui_cache: None,
             canvas: Canvas::new(),
             theme,
-            mouse_icon: Interaction::None,
+            interaction: MouseInteraction::None,
             _message: PhantomData,
         }
     }
@@ -107,20 +108,41 @@ impl<Message, Theme> Interface<Message, Theme> {
         );
 
         // Draw the interface, update the mouse icon for when we present the ui.
-        self.mouse_icon = interface.draw(&mut self.canvas, &self.theme, &Style::default(), cursor);
+        let icon = interface.draw(&mut self.canvas, &self.theme, &Style::default(), cursor);
+
+        match icon == Interaction::None {
+            true if matches!(self.interaction, MouseInteraction::Some(_)) => {
+                self.interaction = MouseInteraction::Reset;
+            }
+            false => self.interaction = MouseInteraction::Some(icon),
+            _ => (),
+        }
 
         self.ui_cache = Some(interface.into_cache());
     }
 
     /// Interacting with the UI will update the mouse icon
-    pub fn update_cursor(&self) {
-        set_mouse_cursor(convert::cursor_icon(self.mouse_icon));
+    pub fn update_cursor(&mut self) {
+        match self.interaction {
+            MouseInteraction::None => {}
+            MouseInteraction::Some(icon) => set_mouse_cursor(convert::cursor_icon(icon)),
+            MouseInteraction::Reset => {
+                set_mouse_cursor(CursorIcon::Default);
+                self.interaction = MouseInteraction::None;
+            }
+        }
     }
 
     /// Present the UI
     pub fn present(&mut self) {
         global::iced_ctx_mut(|ctx| self.canvas.present(&mut ctx.engine))
     }
+}
+
+enum MouseInteraction {
+    None,
+    Some(Interaction),
+    Reset,
 }
 
 fn fetch_viewport() -> Viewport {
