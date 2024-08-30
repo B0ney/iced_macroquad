@@ -18,6 +18,7 @@ pub struct Interface<Message, Theme = iced_core::Theme> {
     ui_cache: Option<Cache>,
     canvas: Canvas,
     theme: Theme,
+    mouse_icon: Interaction,
     _message: PhantomData<Message>,
 }
 
@@ -34,6 +35,7 @@ impl<Message, Theme> Interface<Message, Theme> {
             ui_cache: None,
             canvas: Canvas::new(),
             theme,
+            mouse_icon: Interaction::None,
             _message: PhantomData,
         }
     }
@@ -104,19 +106,18 @@ impl<Message, Theme> Interface<Message, Theme> {
             messages,
         );
 
-        // Draw the interface
-        let interaction = interface.draw(&mut self.canvas, &self.theme, &Style::default(), cursor);
-
-        // Update cursor icon.
-        if interaction != Interaction::None {
-            set_mouse_cursor(convert::cursor_icon(interaction));
-        }
+        // Draw the interface, update the mouse icon for when we present the ui.
+        self.mouse_icon = interface.draw(&mut self.canvas, &self.theme, &Style::default(), cursor);
 
         self.ui_cache = Some(interface.into_cache());
     }
 
     /// Present the UI
     pub fn present(&mut self) {
+        if self.mouse_icon != Interaction::None {
+            set_mouse_cursor(convert::cursor_icon(self.mouse_icon));
+        }
+
         global::iced_ctx_mut(|ctx| self.canvas.present(&mut ctx.engine))
     }
 }
