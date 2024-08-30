@@ -1,6 +1,7 @@
 pub mod engine;
 mod layer;
 pub mod quad;
+mod text;
 
 use engine::Engine;
 use iced_core::renderer::Quad;

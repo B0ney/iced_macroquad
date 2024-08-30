@@ -2,6 +2,7 @@ use iced_core::{renderer, Background, Rectangle, Transformation};
 use iced_graphics::layer;
 
 pub type Stack = layer::Stack<Layer>;
+use super::{quad, text};
 
 #[derive(Debug)]
 pub struct Layer {
