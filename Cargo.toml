@@ -21,5 +21,3 @@ iced_graphics.workspace = true
 iced_core.workspace = true
 iced_widget.workspace = true
 iced_runtime.workspace = true
-rustc-hash.workspace = true
-typeid = "1.0.2"

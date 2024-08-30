@@ -1,19 +1,13 @@
-use std::any::TypeId;
-
 use crate::event_handler::{EventProxy, EventProxyWrapper};
 use crate::renderer::engine::Engine;
-use crate::renderer::Canvas;
-use crate::Renderer;
 
 use iced_core::Size;
 use iced_graphics::Viewport;
 use macroquad::window::get_internal_gl;
 use macroquad::{miniquad::window::screen_size, window::screen_dpi_scale};
-use rustc_hash::FxHashMap;
 
 pub(crate) struct Context {
     pub engine: Engine,
-    pub canvases: FxHashMap<TypeId, Canvas>,
     pub input_subscriber_id: usize,
 }
 
@@ -22,14 +16,7 @@ impl Context {
         Self {
             input_subscriber_id: macroquad::input::utils::register_input_subscriber(),
             engine: Engine::new(unsafe { get_internal_gl().quad_context }),
-            canvases: FxHashMap::default(),
         }
-    }
-
-    pub fn fetch_canvas<Message>(&mut self) -> &mut Canvas {
-        self.canvases
-            .entry(typeid::of::<Message>())
-            .or_insert_with(|| Canvas::new())
     }
 
     pub fn read_events<T: EventProxy>(&self, event_proxy: T) {
@@ -45,12 +32,6 @@ impl Context {
             Size::new(width as u32, height as u32),
             screen_dpi_scale() as f64,
         )
-    }
-
-    pub fn present<Message>(&mut self) {
-        if let Some(canvas) = self.canvases.get_mut(&typeid::of::<Message>()) {
-            canvas.present(&mut self.engine)
-        }
     }
 }
 

@@ -29,7 +29,6 @@ impl iced_graphics::Layer for Layer {
     }
 
     fn flush(&mut self) {
-        todo!()
     }
 
     fn resize(&mut self, bounds: Rectangle) {

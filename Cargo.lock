@@ -431,8 +431,6 @@ dependencies = [
  "iced_runtime",
  "iced_widget",
  "macroquad",
- "rustc-hash 2.0.0",
- "typeid",
 ]
 
 [[package]]
@@ -1057,12 +1055,6 @@ name = "ttf-parser"
 version = "0.21.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2c591d83f69777866b9126b24c6dd9a18351f177e49d625920d19f989fd31cf8"
-
-[[package]]
-name = "typeid"
-version = "1.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e13db2e0ccd5e14a544e8a246ba2312cd25223f616442d7f2cb0e3db614236e"
 
 [[package]]
 name = "unicode-bidi"
