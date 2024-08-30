@@ -431,6 +431,7 @@ dependencies = [
  "iced_runtime",
  "iced_widget",
  "macroquad",
+ "rustc-hash 2.0.0",
 ]
 
 [[package]]

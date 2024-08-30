@@ -8,4 +8,8 @@ impl State {
     pub fn new(ctx: &mut Context) -> Self {
         Self {}
     }
+
+    pub fn draw(ctx: &mut Context) {
+        
+    }
 }

@@ -112,8 +112,7 @@ impl<Message, Theme> Interface<Message, Theme> {
     /// Present the UI
     pub fn present(&mut self) {
         global::iced_ctx_mut(|ctx| {
-            dbg!(&ctx.renderer.commands());
-            ctx.renderer.clear()
+            ctx.renderer.present()
         })
     }
 }

@@ -1,72 +1,59 @@
+mod layer;
 pub mod state;
+pub mod quad;
 
-use iced_core::{
-    renderer::Quad, Background, Color, Font, Pixels, Point, Rectangle, Transformation,
-};
+use iced_core::renderer::Quad;
+use iced_core::{Background, Color, Font, Pixels, Point, Rectangle, Transformation};
 use macroquad::miniquad::Context;
 use state::State;
 
-#[derive(Debug, Clone, Copy)]
-pub enum DrawCommand {
-    FillQuad(Quad, Background),
-    StartLayer,
-    EndLayer,
-    StartTransformation(Transformation),
-    EndTransformation,
-    Clear,
-}
 
-pub struct Painter {
-    commands: Vec<DrawCommand>,
+pub struct Renderer {
     state: State,
+    layers: layer::Stack,
 }
 
-impl Painter {
-    pub fn commands(&self) -> &[DrawCommand] {
-        &self.commands
-    }
+impl Renderer {
     pub fn new(ctx: &mut Context) -> Self {
         Self {
-            commands: Vec::new(),
             state: State::new(ctx),
+            layers: layer::Stack::new(),
         }
     }
-    pub fn clear(&mut self) {
-        self.commands.clear()
-    }
 
-    pub fn add(&mut self, command: DrawCommand) {
-        self.commands.push(command)
+    pub fn present(&mut self) {
+
     }
 }
 
-impl iced_core::Renderer for Painter {
+impl iced_core::Renderer for Renderer {
     fn start_layer(&mut self, bounds: Rectangle) {
-        self.add(DrawCommand::StartLayer)
+        self.layers.push_clip(bounds);
     }
 
     fn end_layer(&mut self) {
-        self.add(DrawCommand::EndLayer)
+        self.layers.pop_clip();
     }
 
-    fn start_transformation(&mut self, transformation: iced_core::Transformation) {
-        self.add(DrawCommand::StartTransformation(transformation))
+    fn start_transformation(&mut self, transformation: Transformation) {
+        self.layers.push_transformation(transformation);
     }
 
     fn end_transformation(&mut self) {
-        self.add(DrawCommand::EndTransformation)
+        self.layers.pop_transformation();
     }
 
     fn fill_quad(&mut self, quad: Quad, background: impl Into<Background>) {
-        self.add(DrawCommand::FillQuad(quad, background.into()))
+        let (layer, transformation) = self.layers.current_mut();
+        layer.draw_quad(quad, background.into(), transformation);
     }
 
     fn clear(&mut self) {
-        self.add(DrawCommand::Clear)
+        self.layers.clear()
     }
 }
 
-impl iced_core::text::Renderer for Painter {
+impl iced_core::text::Renderer for Renderer {
     type Font = Font;
     type Paragraph = ();
     type Editor = ();

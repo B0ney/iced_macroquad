@@ -12,7 +12,7 @@ iced_graphics = { git = "https://github.com/iced-rs/iced" }
 iced_widget = { git = "https://github.com/iced-rs/iced" }
 # iced_mq_runtime = { path = "runtime" }
 iced_runtime = { git = "https://github.com/iced-rs/iced" }
-
+rustc-hash = "2.0.0"
 macroquad = "0.4.13"
 
 [dependencies]
@@ -21,3 +21,4 @@ iced_graphics.workspace = true
 iced_core.workspace = true
 iced_widget.workspace = true
 iced_runtime.workspace = true
+rustc-hash.workspace = true
