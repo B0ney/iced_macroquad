@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use iced_core::mouse::{Cursor, Interaction};
 use iced_core::renderer::Style;
-use iced_core::{clipboard, Element, Point, Size};
+use iced_core::{Element, Point, Size};
 use iced_graphics::Viewport;
 use iced_runtime::{user_interface::Cache, UserInterface};
 
@@ -103,7 +103,7 @@ impl<Message, Theme> Interface<Message, Theme> {
             &self.in_events,
             cursor,
             &mut self.canvas,
-            &mut clipboard::Null,
+            &mut ctx.clipboard,
             messages,
         );
 

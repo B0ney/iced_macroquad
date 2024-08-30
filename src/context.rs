@@ -1,13 +1,12 @@
+use crate::clipboard::Clipboard;
 use crate::event_handler::{EventProxy, EventProxyWrapper};
 use crate::renderer::engine::Engine;
 
-use iced_core::Size;
-use iced_graphics::Viewport;
 use macroquad::window::get_internal_gl;
-use macroquad::{miniquad::window::screen_size, window::screen_dpi_scale};
 
 pub(crate) struct Context {
     pub engine: Engine,
+    pub clipboard: Clipboard,
     pub input_subscriber_id: usize,
 }
 
@@ -16,6 +15,7 @@ impl Context {
         Self {
             input_subscriber_id: macroquad::input::utils::register_input_subscriber(),
             engine: Engine::new(unsafe { get_internal_gl().quad_context }),
+            clipboard: Clipboard::default(),
         }
     }
 
@@ -24,14 +24,6 @@ impl Context {
             &mut EventProxyWrapper(event_proxy),
             self.input_subscriber_id,
         );
-    }
-
-    pub fn fetch_viewport(&self) -> Viewport {
-        let (width, height) = screen_size();
-        Viewport::with_physical_size(
-            Size::new(width as u32, height as u32),
-            screen_dpi_scale() as f64,
-        )
     }
 }
 
