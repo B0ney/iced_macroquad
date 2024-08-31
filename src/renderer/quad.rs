@@ -88,7 +88,6 @@ impl Pipeline {
         gl.apply_bindings(&self.bindings);
 
         for [x, y] in quads.iter().copied() {
-            dbg!((x, y));
             gl.apply_uniforms(UniformsSource::table(&shader::Uniforms { offset: (x, y) }));
             gl.draw(0, 6, 1);
         }

@@ -1,5 +1,3 @@
-pub mod state;
-
 use macroquad::miniquad::Context;
 
 use super::{layer::Layer, quad, text, Canvas};
@@ -13,7 +11,7 @@ pub struct Engine {
 impl Engine {
     pub fn new(ctx: &mut Context) -> Self {
         Self {
-            text_pipeline: text::Pipeline::new(),
+            text_pipeline: text::Pipeline::new(ctx),
             quad_pipeline: quad::Pipeline::new(ctx),
         }
     }
