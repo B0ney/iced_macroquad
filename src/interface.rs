@@ -6,8 +6,6 @@ use iced_core::{Element, Point, Size};
 use iced_graphics::Viewport;
 use iced_runtime::{user_interface::Cache, UserInterface};
 
-use macroquad::input::mouse_position;
-use macroquad::miniquad::window::{dpi_scale, screen_size, set_mouse_cursor};
 use macroquad::miniquad::CursorIcon;
 
 use crate::context::{global, Context};
@@ -59,10 +57,12 @@ impl<Message, Theme> Interface<Message, Theme> {
         messages: &mut Vec<Message>,
         ui: Element<'_, Message, Theme, Renderer>,
     ) {
+        let viewport = Viewport::with_physical_size(Size::from(ctx.screen_size()), ctx.dpi_scale());
+
         // Build the interface.
         let mut interface = UserInterface::build(
             ui,
-            fetch_viewport().logical_size(),
+            viewport.logical_size(),
             self.ui_cache.take().unwrap_or_default(),
             &mut self.canvas,
         );
@@ -72,7 +72,7 @@ impl<Message, Theme> Interface<Message, Theme> {
         ctx.read_events(&mut self.in_events);
 
         // Update the interface by processing the events.
-        let cursor = fetch_cursor();
+        let cursor = Cursor::Available(Point::from(ctx.mouse_position()));
         let (_, _statuses) = interface.update(
             &self.in_events,
             cursor,
@@ -88,10 +88,10 @@ impl<Message, Theme> Interface<Message, Theme> {
         if interaction == Interaction::None {
             if self.interacted {
                 self.interacted = false;
-                set_mouse_cursor(CursorIcon::Default);
+                ctx.set_mouse_icon(CursorIcon::Default);
             }
         } else {
-            set_mouse_cursor(convert::cursor_icon(interaction));
+            ctx.set_mouse_icon(convert::cursor_icon(interaction));
             self.interacted = true;
         }
 
@@ -99,15 +99,6 @@ impl<Message, Theme> Interface<Message, Theme> {
         self.ui_cache = Some(interface.into_cache());
 
         // Render what's drawn on the canvas to the screen.
-        ctx.engine.present(ctx.quad_context(), &mut self.canvas);        
+        ctx.render(&mut self.canvas);
     }
-}
-
-fn fetch_viewport() -> Viewport {
-    let (width, height) = screen_size();
-    Viewport::with_physical_size(Size::new(width as u32, height as u32), dpi_scale() as f64)
-}
-
-fn fetch_cursor() -> Cursor {
-    Cursor::Available(Point::from(mouse_position()))
 }

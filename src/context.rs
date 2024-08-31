@@ -1,8 +1,11 @@
 use crate::clipboard::Clipboard;
 use crate::event_handler::{EventProxy, EventProxyWrapper};
 use crate::renderer::engine::Engine;
+use crate::renderer::Canvas;
 
-use macroquad::miniquad::RenderingBackend;
+use macroquad::input::mouse_position;
+use macroquad::miniquad::window::{dpi_scale, screen_size, set_mouse_cursor};
+use macroquad::miniquad::CursorIcon;
 use macroquad::window::get_internal_gl;
 
 pub(crate) struct Context {
@@ -27,8 +30,26 @@ impl Context {
         );
     }
 
-    pub fn quad_context<'a>(&self) -> &'a mut dyn RenderingBackend {
-        unsafe { get_internal_gl().quad_context }
+    pub fn render(&mut self, canvas: &mut Canvas) {
+        self.engine
+            .present(unsafe { get_internal_gl().quad_context }, canvas)
+    }
+
+    pub fn dpi_scale(&self) -> f64 {
+        dpi_scale() as f64
+    }
+
+    pub fn screen_size(&self) -> (u32, u32) {
+        let (width, height) = screen_size();
+        (width as u32, height as u32)
+    }
+
+    pub fn mouse_position(&self) -> (f32, f32) {
+        mouse_position()
+    }
+
+    pub fn set_mouse_icon(&self, icon: CursorIcon) {
+        set_mouse_cursor(icon)
     }
 }
 
