@@ -19,7 +19,7 @@ pub struct Interface<Message, Theme = iced_core::Theme> {
     ui_cache: Option<Cache>,
     canvas: Canvas,
     theme: Theme,
-    interaction: MouseInteraction,
+    interacted: bool,
     _message: PhantomData<Message>,
 }
 
@@ -36,7 +36,7 @@ impl<Message, Theme> Interface<Message, Theme> {
             ui_cache: None,
             canvas: Canvas::new(),
             theme,
-            interaction: MouseInteraction::None,
+            interacted: false,
             _message: PhantomData,
         }
     }
@@ -45,51 +45,21 @@ impl<Message, Theme> Interface<Message, Theme> {
         self.theme = theme
     }
 
-    /// Interact with the UI, sending all messages to the handler.
-    ///
-    /// ```rust
-    /// use iced_macroquad::widget;
-    ///
-    /// enum Message {
-    ///     Hi,
-    ///     Bye
-    /// }
-    ///
-    /// let mut messages = Vec::new();
-    ///
-    /// ui.interact_with(
-    ///     &mut messages,
-    ///     widget::button("hello").on_click(Message::Hi)
-    /// );
-    /// ```
-    pub fn interact_with<'a, E>(&mut self, messages: &mut Vec<Message>, ui: E)
+    /// Interact with, and view the UI. All interactions will be pushed to messages.
+    pub fn view<'a, E>(&mut self, messages: &mut Vec<Message>, ui: E)
     where
         E: Into<Element<'a, Message, Theme, Renderer>>,
     {
-        global::iced_ctx_mut(|ctx| self.update(ctx, messages, ui.into()));
+        global::iced_ctx_mut(|ctx| self.present(ctx, messages, ui.into()));
     }
 
-    #[must_use = "Messages should be handled."]
-    pub fn interact<'a, E>(&mut self, ui: E) -> Vec<Message>
-    where
-        E: Into<Element<'a, Message, Theme, Renderer>>,
-    {
-        let mut messages = Vec::new();
-        self.interact_with(&mut messages, ui);
-        messages
-    }
-
-    fn update(
+    fn present(
         &mut self,
         ctx: &mut Context,
         messages: &mut Vec<Message>,
         ui: Element<'_, Message, Theme, Renderer>,
     ) {
-        // Fetch all external inputs
-        self.in_events.clear();
-        ctx.read_events(&mut self.in_events);
-
-        // Build the interface
+        // Build the interface.
         let mut interface = UserInterface::build(
             ui,
             fetch_viewport().logical_size(),
@@ -97,7 +67,11 @@ impl<Message, Theme> Interface<Message, Theme> {
             &mut self.canvas,
         );
 
-        // Update the interface
+        // Fetch all external inputs.
+        self.in_events.clear();
+        ctx.read_events(&mut self.in_events);
+
+        // Update the interface by processing the events.
         let cursor = fetch_cursor();
         let (_, _statuses) = interface.update(
             &self.in_events,
@@ -107,48 +81,26 @@ impl<Message, Theme> Interface<Message, Theme> {
             messages,
         );
 
-        // Draw the interface, update the mouse icon for when we present the ui.
-        let icon = interface.draw(&mut self.canvas, &self.theme, &Style::default(), cursor);
+        // Draw the interface onto the canvas.
+        let interaction = interface.draw(&mut self.canvas, &self.theme, &Style::default(), cursor);
 
-        match icon == Interaction::None {
-            true if matches!(self.interaction, MouseInteraction::Some(_)) => {
-                self.interaction = MouseInteraction::Reset;
-            }
-            false => self.interaction = MouseInteraction::Some(icon),
-            _ => (),
-        }
-
-        self.ui_cache = Some(interface.into_cache());
-    }
-
-    /// Interacting with the UI will update the mouse icon
-    pub fn update_cursor(&mut self) {
-        match self.interaction {
-            MouseInteraction::None => {}
-            MouseInteraction::Some(icon) => set_mouse_cursor(convert::cursor_icon(icon)),
-            MouseInteraction::Reset => {
-                self.interaction = MouseInteraction::None;
+        // Update mouse cursor.
+        if interaction == Interaction::None {
+            if self.interacted {
+                self.interacted = false;
                 set_mouse_cursor(CursorIcon::Default);
             }
+        } else {
+            set_mouse_cursor(convert::cursor_icon(interaction));
+            self.interacted = true;
         }
-    }
 
-    /// Present the UI without updating the cursor.
-    pub fn present_without_cursor(&mut self) {
-        global::iced_ctx_mut(|ctx| self.canvas.present(&mut ctx.engine))
-    }
+        // Cache the interface for reuse the next time view is called.
+        self.ui_cache = Some(interface.into_cache());
 
-    /// Present the UI
-    pub fn present(&mut self) {
-        self.update_cursor();
-        self.present_without_cursor()
+        // Render what's drawn on the canvas to the screen.
+        self.canvas.present(&mut ctx.engine)
     }
-}
-
-enum MouseInteraction {
-    None,
-    Some(Interaction),
-    Reset,
 }
 
 fn fetch_viewport() -> Viewport {

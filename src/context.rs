@@ -50,8 +50,4 @@ pub(crate) mod global {
     pub fn iced_ctx_mut<T>(f: impl FnOnce(&mut Context) -> T) -> T {
         ICED_CONTEXT.with_borrow_mut(f)
     }
-
-    pub fn iced_ctx<T>(f: impl FnOnce(&Context) -> T) -> T {
-        ICED_CONTEXT.with_borrow(f)
-    }
 }

@@ -16,15 +16,6 @@ async fn main() {
     let mut counter = 0;
 
     loop {
-        ui.interact_with(
-            &mut messages,
-            row![
-                button("Add").width(32).height(16).on_press(Message::Add),
-                text(counter).width(32),
-                button("Sub").width(32).height(16).on_press(Message::Sub),
-            ],
-        );
-
         for message in messages.drain(..) {
             match message {
                 Message::Add => {
@@ -32,13 +23,20 @@ async fn main() {
                     counter += 1
                 }
                 Message::Sub => {
-                    println!("decrement");
+                    println!("Decrement");
                     counter -= 1
                 }
             }
         }
 
-        ui.present();
+        ui.view(
+            &mut messages,
+            row![
+                button("Add +").width(32).height(16).on_press(Message::Add),
+                text(counter).width(32),
+                button("Sub -").width(32).height(16).on_press(Message::Sub),
+            ],
+        );
 
         next_frame().await
     }
