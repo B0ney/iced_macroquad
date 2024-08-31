@@ -21,3 +21,4 @@ iced_graphics.workspace = true
 iced_core.workspace = true
 iced_widget.workspace = true
 iced_runtime.workspace = true
+bytemuck = { version = "1.9", features = ["derive"] }

@@ -7,7 +7,7 @@ use super::{quad, text};
 #[derive(Debug)]
 pub struct Layer {
     pub bounds: Rectangle,
-    pub quads: (),
+    pub quads: Vec<[f32;2]>,
     pub text: (),
 }
 
@@ -18,6 +18,9 @@ impl Layer {
         background: Background,
         transformation: Transformation,
     ) {
+        let bounds = quad.bounds * transformation;
+
+        self.quads.push([bounds.x, bounds.y]);
     }
 }
 
@@ -38,6 +41,7 @@ impl iced_graphics::Layer for Layer {
 
     fn reset(&mut self) {
         self.bounds = Rectangle::INFINITE;
+        self.quads.clear();
     }
 }
 

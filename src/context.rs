@@ -2,6 +2,7 @@ use crate::clipboard::Clipboard;
 use crate::event_handler::{EventProxy, EventProxyWrapper};
 use crate::renderer::engine::Engine;
 
+use macroquad::miniquad::RenderingBackend;
 use macroquad::window::get_internal_gl;
 
 pub(crate) struct Context {
@@ -24,6 +25,10 @@ impl Context {
             &mut EventProxyWrapper(event_proxy),
             self.input_subscriber_id,
         );
+    }
+
+    pub fn quad_context<'a>(&self) -> &'a mut dyn RenderingBackend {
+        unsafe { get_internal_gl().quad_context }
     }
 }
 

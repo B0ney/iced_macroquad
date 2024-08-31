@@ -426,6 +426,7 @@ dependencies = [
 name = "iced_macroquad"
 version = "0.1.0"
 dependencies = [
+ "bytemuck",
  "iced_core",
  "iced_graphics",
  "iced_runtime",

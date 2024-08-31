@@ -99,7 +99,7 @@ impl<Message, Theme> Interface<Message, Theme> {
         self.ui_cache = Some(interface.into_cache());
 
         // Render what's drawn on the canvas to the screen.
-        self.canvas.present(&mut ctx.engine)
+        ctx.engine.present(ctx.quad_context(), &mut self.canvas);        
     }
 }
 

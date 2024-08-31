@@ -97,7 +97,7 @@ impl<T: EventProxy> miniquad::EventHandler for EventProxyWrapper<T> {
     fn raw_mouse_motion(&mut self, _dx: f32, _dy: f32) {}
 
     fn window_minimized_event(&mut self) {
-        self.add(Event::Window(window::Event::Closed))
+        self.add(Event::Window(window::Event::Unfocused))
     }
 
     fn window_restored_event(&mut self) {}

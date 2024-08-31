@@ -1,9 +1,8 @@
 pub mod engine;
 mod layer;
-pub mod quad;
+mod quad;
 mod text;
 
-use engine::Engine;
 use iced_core::renderer::Quad;
 use iced_core::{Background, Color, Font, Pixels, Point, Rectangle, Transformation};
 
@@ -17,12 +16,6 @@ impl Canvas {
     pub fn new() -> Self {
         Self {
             layers: layer::Stack::new(),
-        }
-    }
-
-    pub fn present(&mut self, engine: &mut Engine) {
-        for layer in self.layers.iter_mut() {
-            
         }
     }
 }
