@@ -1,8 +1,9 @@
-use macroquad::miniquad::Context;
+use macroquad::miniquad as mq;
+use mq::{Context, PassAction};
 
 use super::{layer::Layer, quad, text, Canvas};
 
-/// QuadGl rendering engine
+/// Rendering engine
 pub struct Engine {
     pub(crate) text_pipeline: text::Pipeline,
     pub(crate) quad_pipeline: quad::Pipeline,
@@ -16,7 +17,9 @@ impl Engine {
         }
     }
 
-    pub fn present(&mut self, gl: &mut Context, canvas: &mut Canvas) {
+    pub fn present(&mut self, ctx: &mut Context, canvas: &mut Canvas) {
+        ctx.begin_default_pass(PassAction::Nothing);
+
         for Layer {
             bounds,
             quads,
@@ -24,7 +27,7 @@ impl Engine {
         } in canvas.layers.iter_mut()
         {
             if !quads.is_empty() {
-                self.quad_pipeline.render(gl, &quads);
+                self.quad_pipeline.render(ctx, &quads);
             }
 
             // draw tris
@@ -36,6 +39,7 @@ impl Engine {
             // draw text
         }
 
-        gl.commit_frame();
+        ctx.end_render_pass();
+        ctx.commit_frame();
     }
 }

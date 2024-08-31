@@ -82,17 +82,14 @@ impl Pipeline {
         Self { pipeline, bindings }
     }
 
-    pub fn render(&self, gl: &mut Context, quads: &[[f32; 2]]) {
-        gl.begin_default_pass(Default::default());
-        gl.apply_pipeline(&self.pipeline);
-        gl.apply_bindings(&self.bindings);
+    pub fn render(&self, ctx: &mut Context, quads: &[[f32; 2]]) {
+        ctx.apply_pipeline(&self.pipeline);
+        ctx.apply_bindings(&self.bindings);
 
         for [x, y] in quads.iter().copied() {
-            gl.apply_uniforms(UniformsSource::table(&shader::Uniforms { offset: (x, y) }));
-            gl.draw(0, 6, 1);
+            ctx.apply_uniforms(UniformsSource::table(&shader::Uniforms { offset: (x, y) }));
+            ctx.draw(0, 6, 1);
         }
-
-        gl.end_render_pass();
     }
 }
 
