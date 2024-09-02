@@ -1,5 +1,4 @@
-use macroquad::miniquad as mq;
-use mq::{Context, PassAction};
+use crate::mq::{Context, PassAction};
 
 use super::{layer::Layer, quad, text, Canvas};
 

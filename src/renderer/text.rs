@@ -1,4 +1,4 @@
-use macroquad::miniquad::Context;
+use crate::mq::Context;
 
 
 pub struct Pipeline {

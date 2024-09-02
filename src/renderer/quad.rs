@@ -1,6 +1,7 @@
 use bytemuck::{Pod, Zeroable};
 use iced_graphics::color;
-use macroquad::miniquad::{self as mq, Context, UniformsSource};
+use crate::mq;
+use mq::{Context, UniformsSource};
 
 pub struct Pipeline {
     pub pipeline: mq::Pipeline,

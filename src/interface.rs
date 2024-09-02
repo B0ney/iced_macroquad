@@ -6,7 +6,7 @@ use iced_core::{Element, Point, Size};
 use iced_graphics::Viewport;
 use iced_runtime::{user_interface::Cache, UserInterface};
 
-use macroquad::miniquad::CursorIcon;
+use crate::mq::CursorIcon;
 
 use crate::context::{global, Context};
 use crate::renderer::Canvas;

@@ -3,10 +3,11 @@ use crate::event_handler::{EventProxy, EventProxyWrapper};
 use crate::renderer::engine::Engine;
 use crate::renderer::Canvas;
 
-use macroquad::input::mouse_position;
-use macroquad::miniquad::window::{dpi_scale, screen_size, set_mouse_cursor};
-use macroquad::miniquad::CursorIcon;
-use macroquad::window::get_internal_gl;
+use crate::mq::window::{dpi_scale, screen_size, set_mouse_cursor};
+use crate::mq::CursorIcon;
+
+use crate::macroquad::input::mouse_position;
+use crate::macroquad::window::get_internal_gl;
 
 pub(crate) struct Context {
     pub engine: Engine,

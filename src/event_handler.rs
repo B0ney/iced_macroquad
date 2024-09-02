@@ -1,6 +1,7 @@
 use crate::convert;
+use crate::mq;
+
 use iced_core::{keyboard, mouse, window, Event, Point, Size};
-use macroquad::miniquad;
 
 pub trait EventProxy {
     fn add(&mut self, event: Event);
@@ -29,7 +30,7 @@ impl<T: EventProxy> EventProxy for EventProxyWrapper<T> {
     }
 }
 
-impl<T: EventProxy> miniquad::EventHandler for EventProxyWrapper<T> {
+impl<T: EventProxy> mq::EventHandler for EventProxyWrapper<T> {
     fn update(&mut self) {}
 
     fn draw(&mut self) {}
@@ -52,24 +53,24 @@ impl<T: EventProxy> miniquad::EventHandler for EventProxyWrapper<T> {
         }))
     }
 
-    fn mouse_button_down_event(&mut self, button: miniquad::MouseButton, _x: f32, _y: f32) {
+    fn mouse_button_down_event(&mut self, button: mq::MouseButton, _x: f32, _y: f32) {
         if let Some(button) = convert::mouse_button(button) {
             self.add(Event::Mouse(mouse::Event::ButtonPressed(button)))
         }
     }
 
-    fn mouse_button_up_event(&mut self, button: miniquad::MouseButton, _x: f32, _y: f32) {
+    fn mouse_button_up_event(&mut self, button: mq::MouseButton, _x: f32, _y: f32) {
         if let Some(button) = convert::mouse_button(button) {
             self.add(Event::Mouse(mouse::Event::ButtonReleased(button)))
         }
     }
 
-    fn char_event(&mut self, _character: char, _keymods: miniquad::KeyMods, _repeat: bool) {}
+    fn char_event(&mut self, _character: char, _keymods: mq::KeyMods, _repeat: bool) {}
 
     fn key_down_event(
         &mut self,
-        keycode: miniquad::KeyCode,
-        keymods: miniquad::KeyMods,
+        keycode: mq::KeyCode,
+        keymods: mq::KeyMods,
         _repeat: bool,
     ) {
         let (key, location) = convert::key(keycode);
@@ -81,7 +82,7 @@ impl<T: EventProxy> miniquad::EventHandler for EventProxyWrapper<T> {
         }))
     }
 
-    fn key_up_event(&mut self, keycode: miniquad::KeyCode, keymods: miniquad::KeyMods) {
+    fn key_up_event(&mut self, keycode: mq::KeyCode, keymods: mq::KeyMods) {
         let (key, location) = convert::key(keycode);
         self.add(Event::Keyboard(keyboard::Event::KeyReleased {
             key,
@@ -90,7 +91,7 @@ impl<T: EventProxy> miniquad::EventHandler for EventProxyWrapper<T> {
         }))
     }
 
-    fn touch_event(&mut self, phase: miniquad::TouchPhase, id: u64, x: f32, y: f32) {
+    fn touch_event(&mut self, phase: mq::TouchPhase, id: u64, x: f32, y: f32) {
         self.add(Event::Touch(convert::touch(phase, id, x, y)));
     }
 
