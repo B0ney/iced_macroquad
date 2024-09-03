@@ -1,7 +1,6 @@
 use bytemuck::{Pod, Zeroable};
 use iced_core::{Rectangle, Transformation};
 use iced_graphics::Viewport;
-use macroquad::math::{vec3, Mat4};
 
 use crate::mq::{self, *};
 
@@ -193,7 +192,7 @@ struct Uniforms {
     pub screen_height: u32,
     // Uniforms must be aligned to their largest member,
     // this uses a mat4x4<f32> which aligns to 16, so align to that
-    _padding: [f32; 2],
+    _padding: [f32; 4],
 }
 
 impl Default for Uniforms {
@@ -202,7 +201,7 @@ impl Default for Uniforms {
             transform: *Transformation::IDENTITY.as_ref(),
             scale: 1.0,
             screen_height: 0,
-            _padding: [0.0; 2],
+            _padding: Default::default(),
         }
     }
 }
