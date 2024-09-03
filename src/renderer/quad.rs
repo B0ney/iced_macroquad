@@ -1,6 +1,7 @@
 use bytemuck::{Pod, Zeroable};
 use iced_core::{Rectangle, Transformation};
 use iced_graphics::Viewport;
+use macroquad::math::{vec3, Mat4};
 
 use crate::mq::{self, *};
 
@@ -37,31 +38,41 @@ pub struct Quad {
 }
 
 impl Quad {
-    // TODO: index buffer
     fn bindings(ctx: &mut Context) -> mq::Bindings {
-        let quad_vertex_buffer = ctx.new_buffer(
-            BufferType::VertexBuffer,
-            BufferUsage::Dynamic,
-            BufferSource::empty::<Quad>(MAX_QUADS),
-        );
+        // Create static buffer to store quad vertices.
+        let vertices: [[f32; 2]; 4] = [
+            [0.5, 0.5],   // top right
+            [0.5, -0.5],  // bottom right
+            [-0.5, -0.5], // bottom left
+            [-0.5, 0.5],  // top left
+        ];
 
-        let vertices = [[-0.5, -0.5], [-0.5, 0.5], [0.5, -0.5], [0.5, 0.5]];
+        let vertices: [f32; 8] = bytemuck::cast(vertices);
 
-        let quad_geometry_buffer = ctx.new_buffer(
+        let quad_geometry_vertex_buffer = ctx.new_buffer(
             BufferType::VertexBuffer,
             BufferUsage::Immutable,
             BufferSource::slice(&vertices),
         );
 
+        // Create static buffer to store quad vertex indices.
+        let indices: [u16; 6] = [0, 1, 2, 1, 2, 3];
         let index_buffer = ctx.new_buffer(
             BufferType::IndexBuffer,
+            BufferUsage::Immutable,
+            BufferSource::slice(&indices),
+        );
+
+        // Create an empty, dynamic instance buffer to store quad data.
+        let quad_property_vertex_buffer = ctx.new_buffer(
+            BufferType::VertexBuffer,
             BufferUsage::Dynamic,
-            BufferSource::empty::<i32>(MAX_VERTICES * 12),
+            BufferSource::empty::<Quad>(MAX_QUADS),
         );
 
         Bindings {
-            vertex_buffers: vec![quad_geometry_buffer, quad_vertex_buffer], //todo
-            index_buffer: index_buffer,
+            vertex_buffers: vec![quad_geometry_vertex_buffer, quad_property_vertex_buffer],
+            index_buffer,
             images: vec![],
         }
     }
@@ -130,36 +141,47 @@ impl Pipeline {
         let target_height = viewport.physical_height();
         bounds.height = bounds.height.min(target_height);
 
+        // Clip bounds.
         ctx.apply_scissor_rect(
             bounds.x as i32,
-            (target_height - (bounds.y + bounds.height)) as i32, // todo
+            (target_height - (bounds.y + bounds.height)) as i32,
             bounds.width as i32,
             bounds.height as i32,
         );
 
+        // Update quad buffer with quads from instances
         ctx.buffer_update(
             self.bindings.vertex_buffers[1],
             BufferSource::slice(instances),
         );
 
-        let indices: Vec<i32> = (0..instances.len().min(MAX_QUADS) as i32)
-            .flat_map(|i| [i * 4, 1 + i * 4, 2 + i * 4, 2 + i * 4, 1 + i * 4, 3 + i * 4])
-            .cycle()
-            .take(instances.len() * 6)
-            .collect();
-        
-        ctx.buffer_update(self.bindings.index_buffer, BufferSource::slice(&indices));
-        
         ctx.apply_pipeline(&self.pipeline);
         ctx.apply_bindings(&self.bindings);
+
+        // TODO: are the uniforms the culprit?
         ctx.apply_uniforms(UniformsSource::table(&Uniforms {
-            transform: *viewport.projection().as_ref(),
+            transform: {
+                // projection expands to this: 
+                //
+                // Mat4::orthographic_rh_gl(
+                //     0.0, 
+                //     viewport.physical_width() as f32, 
+                //     0.0, 
+                //     viewport.physical_height() as f32, 
+                //     -1.0, 
+                //     1.0
+                // );
+                //
+                // see: pg 465 in learopengl
+
+                *viewport.projection().as_ref()
+            },
             scale: viewport.scale_factor() as f32,
             screen_height: target_height,
             ..Default::default()
         }));
 
-        ctx.draw(0, indices.len() as i32, instances.len() as i32);
+        ctx.draw(0, 6, instances.len() as i32);
     }
 }
 
