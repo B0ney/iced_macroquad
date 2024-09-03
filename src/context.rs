@@ -1,3 +1,6 @@
+use iced_core::Size;
+use iced_graphics::Viewport;
+
 use crate::clipboard::Clipboard;
 use crate::event_handler::{EventProxy, EventProxyWrapper};
 use crate::renderer::engine::Engine;
@@ -32,8 +35,11 @@ impl Context {
     }
 
     pub fn render(&mut self, canvas: &mut Canvas) {
-        self.engine
-            .present(unsafe { get_internal_gl().quad_context }, canvas)
+        self.engine.present(
+            unsafe { get_internal_gl().quad_context },
+            canvas,
+            &self.viewport(),
+        )
     }
 
     pub fn dpi_scale(&self) -> f64 {
@@ -51,6 +57,10 @@ impl Context {
 
     pub fn set_mouse_icon(&self, icon: CursorIcon) {
         set_mouse_cursor(icon)
+    }
+
+    pub fn viewport(&self) -> Viewport {
+        Viewport::with_physical_size(self.screen_size().into(), self.dpi_scale())
     }
 }
 

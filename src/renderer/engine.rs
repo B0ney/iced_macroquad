@@ -1,3 +1,6 @@
+use iced_core::Rectangle;
+use iced_graphics::Viewport;
+
 use crate::mq::{Context, PassAction};
 
 use super::{layer::Layer, quad, text, Canvas};
@@ -16,7 +19,7 @@ impl Engine {
         }
     }
 
-    pub fn present(&mut self, ctx: &mut Context, canvas: &mut Canvas) {
+    pub fn present(&mut self, ctx: &mut Context, canvas: &mut Canvas, viewport: &Viewport) {
         ctx.begin_default_pass(PassAction::Nothing);
 
         for Layer {
@@ -25,8 +28,16 @@ impl Engine {
             text,
         } in canvas.layers.iter_mut()
         {
+            // TODO
+            let bounds = Rectangle {
+                x: bounds.x as u32,
+                y: bounds.y as u32,
+                width: bounds.width as u32,
+                height: bounds.height as u32,
+            };
+
             if !quads.is_empty() {
-                self.quad_pipeline.render(ctx, &quads);
+                self.quad_pipeline.render(ctx, &quads, bounds, &viewport);
             }
 
             // draw tris

@@ -57,12 +57,10 @@ impl<Message, Theme> Interface<Message, Theme> {
         messages: &mut Vec<Message>,
         ui: Element<'_, Message, Theme, Renderer>,
     ) {
-        let viewport = Viewport::with_physical_size(Size::from(ctx.screen_size()), ctx.dpi_scale());
-
         // Build the interface.
         let mut interface = UserInterface::build(
             ui,
-            viewport.logical_size(),
+            ctx.viewport().logical_size(),
             self.ui_cache.take().unwrap_or_default(),
             &mut self.canvas,
         );

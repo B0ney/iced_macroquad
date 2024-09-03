@@ -1,98 +1,12 @@
 use bytemuck::{Pod, Zeroable};
-use iced_graphics::color;
-use crate::mq;
-use mq::{Context, UniformsSource};
+use iced_core::{Rectangle, Transformation};
+use iced_graphics::{color, Viewport};
 
-pub struct Pipeline {
-    pub pipeline: mq::Pipeline,
-    pub bindings: mq::Bindings,
-}
+use crate::mq::{self, *};
 
-#[repr(C)]
-struct Vec2 {
-    x: f32,
-    y: f32,
-}
-#[repr(C)]
-struct Vertex {
-    pos: Vec2,
-    uv: Vec2,
-}
-
-impl Pipeline {
-    pub fn new(ctx: &mut Context) -> Self {
-        #[rustfmt::skip]
-        let vertices: [Vertex; 4] = [
-            Vertex { pos : Vec2 { x: -0.5, y: -0.5 }, uv: Vec2 { x: 0., y: 0. } },
-            Vertex { pos : Vec2 { x:  0.5, y: -0.5 }, uv: Vec2 { x: 1., y: 0. } },
-            Vertex { pos : Vec2 { x:  0.5, y:  0.5 }, uv: Vec2 { x: 1., y: 1. } },
-            Vertex { pos : Vec2 { x: -0.5, y:  0.5 }, uv: Vec2 { x: 0., y: 1. } },
-        ];
-        let vertex_buffer = ctx.new_buffer(
-            mq::BufferType::VertexBuffer,
-            mq::BufferUsage::Immutable,
-            mq::BufferSource::slice(&vertices),
-        );
-
-        let indices: [u16; 6] = [0, 1, 2, 0, 2, 3];
-        let index_buffer = ctx.new_buffer(
-            mq::BufferType::IndexBuffer,
-            mq::BufferUsage::Immutable,
-            mq::BufferSource::slice(&indices),
-        );
-
-        let pixels: [u8; 4 * 4 * 4] = [
-            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00,
-            0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0xFF,
-            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0xFF, 0xFF,
-            0xFF, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-            0xFF, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-        ];
-        let texture = ctx.new_texture_from_rgba8(4, 4, &pixels);
-
-        let bindings = mq::Bindings {
-            vertex_buffers: vec![vertex_buffer],
-            index_buffer,
-            images: vec![texture],
-        };
-
-        let shader = ctx
-            .new_shader(
-                match ctx.info().backend {
-                    mq::Backend::OpenGl => mq::ShaderSource::Glsl {
-                        vertex: shader::VERTEX,
-                        fragment: shader::FRAGMENT,
-                    },
-                    mq::Backend::Metal => mq::ShaderSource::Msl {
-                        program: shader::METAL,
-                    },
-                },
-                shader::meta(),
-            )
-            .unwrap();
-
-        let pipeline = ctx.new_pipeline(
-            &[mq::BufferLayout::default()],
-            &[
-                mq::VertexAttribute::new("in_pos", mq::VertexFormat::Float2),
-                mq::VertexAttribute::new("in_uv", mq::VertexFormat::Float2),
-            ],
-            shader,
-            mq::PipelineParams::default(),
-        );
-        Self { pipeline, bindings }
-    }
-
-    pub fn render(&self, ctx: &mut Context, quads: &[[f32; 2]]) {
-        ctx.apply_pipeline(&self.pipeline);
-        ctx.apply_bindings(&self.bindings);
-
-        for [x, y] in quads.iter().copied() {
-            ctx.apply_uniforms(UniformsSource::table(&shader::Uniforms { offset: (x, y) }));
-            ctx.draw(0, 6, 1);
-        }
-    }
-}
+const MAX_QUADS: usize = 1000;
+const MAX_VERTICES: usize = MAX_QUADS * 4;
+const MAX_INDICES: usize = MAX_QUADS * 6;
 
 /// The properties of a quad.
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
@@ -105,99 +19,172 @@ pub struct Quad {
     pub size: [f32; 2],
 
     /// The border color of the [`Quad`], in __linear RGB__.
-    pub border_color: color::Packed,
+    pub border_color: [f32; 4],
 
     /// The border radii of the [`Quad`].
     pub border_radius: [f32; 4],
 
     /// The border width of the [`Quad`].
     pub border_width: f32,
+    // /// The shadow color of the [`Quad`].
+    // pub shadow_color: [f32; 4],
 
-    /// The shadow color of the [`Quad`].
-    pub shadow_color: color::Packed,
+    // /// The shadow offset of the [`Quad`].
+    // pub shadow_offset: [f32; 2],
 
-    /// The shadow offset of the [`Quad`].
-    pub shadow_offset: [f32; 2],
-
-    /// The shadow blur radius of the [`Quad`].
-    pub shadow_blur_radius: f32,
+    // /// The shadow blur radius of the [`Quad`].
+    // pub shadow_blur_radius: f32,
 }
 
-mod shader {
-    use macroquad::miniquad::*;
+impl Quad {
+    // TODO: index buffer
+    fn bindings(ctx: &mut Context) -> mq::Bindings {
+        let quad_vertex_buffer = ctx.new_buffer(
+            BufferType::VertexBuffer,
+            BufferUsage::Dynamic,
+            BufferSource::empty::<Quad>(MAX_QUADS),
+        );
 
-    pub const VERTEX: &str = r#"#version 100
-    attribute vec2 in_pos;
-    attribute vec2 in_uv;
+        let index_buffer = ctx.new_buffer(
+            BufferType::IndexBuffer,
+            BufferUsage::Dynamic,
+            BufferSource::empty::<i32>(MAX_VERTICES * 12),
+        );
 
-    uniform vec2 offset;
-
-    varying lowp vec2 texcoord;
-
-    void main() {
-        gl_Position = vec4(in_pos + offset, 0, 1);
-        texcoord = in_uv;
-    }"#;
-
-    pub const FRAGMENT: &str = r#"#version 100
-    varying lowp vec2 texcoord;
-
-    uniform sampler2D tex;
-
-    void main() {
-        gl_FragColor = texture2D(tex, texcoord);
-    }"#;
-
-    pub const METAL: &str = r#"
-    #include <metal_stdlib>
-
-    using namespace metal;
-
-    struct Uniforms
-    {
-        float2 offset;
-    };
-
-    struct Vertex
-    {
-        float2 in_pos   [[attribute(0)]];
-        float2 in_uv    [[attribute(1)]];
-    };
-
-    struct RasterizerData
-    {
-        float4 position [[position]];
-        float2 uv       [[user(locn0)]];
-    };
-
-    vertex RasterizerData vertexShader(
-      Vertex v [[stage_in]], 
-      constant Uniforms& uniforms [[buffer(0)]])
-    {
-        RasterizerData out;
-
-        out.position = float4(v.in_pos.xy + uniforms.offset, 0.0, 1.0);
-        out.uv = v.in_uv;
-
-        return out;
-    }
-
-    fragment float4 fragmentShader(RasterizerData in [[stage_in]], texture2d<float> tex [[texture(0)]], sampler texSmplr [[sampler(0)]])
-    {
-        return tex.sample(texSmplr, in.uv);
-    }"#;
-
-    pub fn meta() -> ShaderMeta {
-        ShaderMeta {
-            images: vec!["tex".to_string()],
-            uniforms: UniformBlockLayout {
-                uniforms: vec![UniformDesc::new("offset", UniformType::Float2)],
-            },
+        Bindings {
+            vertex_buffers: vec![quad_vertex_buffer], //todo
+            index_buffer: index_buffer,
+            images: vec![],
         }
     }
 
-    #[repr(C)]
-    pub struct Uniforms {
-        pub offset: (f32, f32),
+    fn pipeline(ctx: &mut Context) -> mq::Pipeline {
+        if ctx.info().backend == mq::Backend::Metal {
+            unimplemented!("Metal is not supported.");
+        }
+
+        let shader = ctx
+            .new_shader(
+                ShaderSource::Glsl {
+                    vertex: include_str!("shader/quad.vert"),
+                    fragment: include_str!("shader/quad.frag"),
+                },
+                ShaderMeta {
+                    images: vec![],
+                    uniforms: Uniforms::uniforms(),
+                },
+            )
+            .unwrap();
+
+        let attributes = &[
+            VertexAttribute::new("i_Pos", VertexFormat::Float2),
+            VertexAttribute::new("i_Size", VertexFormat::Float2),
+            VertexAttribute::new("i_BorderColor", VertexFormat::Float4),
+            VertexAttribute::new("i_BorderRadius", VertexFormat::Float4),
+            VertexAttribute::new("i_BorderWidth", VertexFormat::Float1),
+            // VertexAttribute::new("i_shadow_color", VertexFormat::Float4),
+            // VertexAttribute::new("i_shadow_offset", VertexFormat::Float2),
+            // VertexAttribute::new("i_shadow_blur_radius", VertexFormat::Float1),
+        ];
+
+        ctx.new_pipeline(
+            &[mq::BufferLayout {
+                step_func: VertexStep::PerInstance,
+                ..Default::default()
+            }],
+            attributes,
+            shader,
+            mq::PipelineParams::default(),
+        )
+    }
+}
+
+pub struct Pipeline {
+    pub pipeline: mq::Pipeline,
+    pub bindings: mq::Bindings,
+}
+
+impl Pipeline {
+    pub fn new(ctx: &mut Context) -> Self {
+        Self {
+            pipeline: Quad::pipeline(ctx),
+            bindings: Quad::bindings(ctx),
+        }
+    }
+
+    pub fn render(
+        &mut self,
+        ctx: &mut Context,
+        instances: &[Quad],
+        mut bounds: Rectangle<u32>,
+        viewport: &Viewport,
+    ) {
+        let target_height = viewport.physical_height();
+        bounds.height = bounds.height.min(target_height);
+
+        ctx.apply_scissor_rect(
+            bounds.x as i32,
+            (target_height - (bounds.y + bounds.height)) as i32, // todo
+            bounds.width as i32,
+            bounds.height as i32,
+        );
+
+        ctx.buffer_update(
+            self.bindings.vertex_buffers[0],
+            BufferSource::slice(instances),
+        );
+
+        let indices: Vec<i32> = (0..instances.len().min(MAX_QUADS) as i32)
+            .flat_map(|i| [i * 4, 1 + i * 4, 2 + i * 4, 2 + i * 4, 1 + i * 4, 3 + i * 4])
+            .cycle()
+            .take(instances.len() * 6)
+            .collect();
+        ctx.buffer_update(self.bindings.index_buffer, BufferSource::slice(&indices));
+
+        ctx.apply_pipeline(&self.pipeline);
+        ctx.apply_bindings(&self.bindings);
+
+        ctx.apply_uniforms(UniformsSource::table(&Uniforms {
+            transform: *viewport.projection().as_ref(),
+            scale: viewport.scale_factor() as f32,
+            screen_height: target_height,
+            ..Default::default()
+        }));
+
+        ctx.draw(0, indices.len() as i32, instances.len() as i32);
+    }
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy, Zeroable, Pod)]
+struct Uniforms {
+    pub transform: [f32; 16],
+    pub scale: f32,
+    pub screen_height: u32,
+    // Uniforms must be aligned to their largest member,
+    // this uses a mat4x4<f32> which aligns to 16, so align to that
+    _padding: [f32; 2],
+}
+
+impl Default for Uniforms {
+    fn default() -> Self {
+        Self {
+            transform: *Transformation::IDENTITY.as_ref(),
+            scale: 1.0,
+            screen_height: 0,
+            _padding: [0.0; 2],
+        }
+    }
+}
+
+impl Uniforms {
+    fn uniforms() -> UniformBlockLayout {
+        UniformBlockLayout {
+            uniforms: vec![
+                UniformDesc::new("u_Transform", UniformType::Mat4),
+                UniformDesc::new("u_Scale", UniformType::Float1),
+                UniformDesc::new("u_ScreenHeight", UniformType::Int1),
+            ],
+        }
     }
 }
