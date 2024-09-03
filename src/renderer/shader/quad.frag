@@ -20,22 +20,19 @@ in vec2 v_Scale;
 in vec4 v_BorderRadius;
 in float v_BorderWidth;
 
-float fDistance(vec2 frag_coord, vec2 position, vec2 size, float radius)
-{
-    // TODO: Try SDF approach: https://www.shadertoy.com/view/wd3XRN
-    vec2 inner_size = size - vec2(radius, radius) * 2.0;
+float roundedBoxSdf(vec2 to_center, vec2 size, float radius) {
+  return length(max(abs(to_center) - size + vec2(radius, radius), vec2(0.0, 0.0))) - radius;
+}
+
+float fDistance(
+    vec2 frag_coord, 
+    vec2 position,
+    vec2 size, 
+    float radius
+) {
+    vec2 inner_half_size = (size - vec2(radius, radius) * 2.0) / 2.0;
     vec2 top_left = position + vec2(radius, radius);
-    vec2 bottom_right = top_left + inner_size;
-
-    vec2 top_left_distance = top_left - frag_coord;
-    vec2 bottom_right_distance = frag_coord - bottom_right;
-
-    vec2 distance = vec2(
-        max(max(top_left_distance.x, bottom_right_distance.x), 0.0),
-        max(max(top_left_distance.y, bottom_right_distance.y), 0.0)
-    );
-
-    return sqrt(distance.x * distance.x + distance.y * distance.y);
+    return roundedBoxSdf(frag_coord - top_left - inner_half_size, inner_half_size, 0.0);
 }
 
 float selectBorderRadius(vec4 radi, vec2 position, vec2 center)
@@ -49,7 +46,7 @@ float selectBorderRadius(vec4 radi, vec2 position, vec2 center)
 }
 
 void main() {
-    vec4 mixed_color;
+    vec4 mixed_color = v_Color;
 
     vec2 fragCoord = vec2(gl_FragCoord.x, u_ScreenHeight - gl_FragCoord.y);
 
@@ -59,7 +56,6 @@ void main() {
         (v_Pos + v_Scale * 0.5).xy
     );
 
-    // TODO: Remove branching (?)
     if(v_BorderWidth > 0.0) {
         float internal_border = max(border_radius - v_BorderWidth, 0.0);
 
@@ -77,19 +73,24 @@ void main() {
         );
 
         mixed_color = mix(v_Color, v_BorderColor, border_mix);
-    } else {
-        mixed_color = v_Color;
     }
 
-    float d = fDistance(
+    float dist = fDistance(
         fragCoord,
         v_Pos,
         v_Scale,
         border_radius
     );
 
-    float radius_alpha =
-        1.0 - smoothstep(max(border_radius - 0.5, 0.0), border_radius + 0.5, d);
+    float radius_alpha = 1.0 - smoothstep(
+        max(border_radius - 0.5, 0.0),
+        border_radius + 0.5, 
+        dist
+    );
 
-    gl_FragColor = vec4(mixed_color.xyz, mixed_color.w * radius_alpha);
+    vec4 quad_color = vec4(mixed_color.xyz, mixed_color.w * radius_alpha);
+
+    // todo: shadows
+
+    gl_FragColor = quad_color;
 }

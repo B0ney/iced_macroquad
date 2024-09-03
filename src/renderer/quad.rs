@@ -1,6 +1,6 @@
 use bytemuck::{Pod, Zeroable};
 use iced_core::{Rectangle, Transformation};
-use iced_graphics::{color, Viewport};
+use iced_graphics::Viewport;
 
 use crate::mq::{self, *};
 
@@ -45,6 +45,14 @@ impl Quad {
             BufferSource::empty::<Quad>(MAX_QUADS),
         );
 
+        let vertices = [[-0.5, -0.5], [-0.5, 0.5], [0.5, -0.5], [0.5, 0.5]];
+
+        let quad_geometry_buffer = ctx.new_buffer(
+            BufferType::VertexBuffer,
+            BufferUsage::Immutable,
+            BufferSource::slice(&vertices),
+        );
+
         let index_buffer = ctx.new_buffer(
             BufferType::IndexBuffer,
             BufferUsage::Dynamic,
@@ -52,7 +60,7 @@ impl Quad {
         );
 
         Bindings {
-            vertex_buffers: vec![quad_vertex_buffer], //todo
+            vertex_buffers: vec![quad_geometry_buffer, quad_vertex_buffer], //todo
             index_buffer: index_buffer,
             images: vec![],
         }
@@ -77,11 +85,11 @@ impl Quad {
             .unwrap();
 
         let attributes = &[
-            VertexAttribute::new("i_Pos", VertexFormat::Float2),
-            VertexAttribute::new("i_Size", VertexFormat::Float2),
-            VertexAttribute::new("i_BorderColor", VertexFormat::Float4),
-            VertexAttribute::new("i_BorderRadius", VertexFormat::Float4),
-            VertexAttribute::new("i_BorderWidth", VertexFormat::Float1),
+            VertexAttribute::with_buffer("i_Pos", VertexFormat::Float2, 0),
+            VertexAttribute::with_buffer("i_Size", VertexFormat::Float2, 0),
+            VertexAttribute::with_buffer("i_BorderColor", VertexFormat::Float4, 0),
+            VertexAttribute::with_buffer("i_BorderRadius", VertexFormat::Float4, 0),
+            VertexAttribute::with_buffer("i_BorderWidth", VertexFormat::Float1, 0),
             // VertexAttribute::new("i_shadow_color", VertexFormat::Float4),
             // VertexAttribute::new("i_shadow_offset", VertexFormat::Float2),
             // VertexAttribute::new("i_shadow_blur_radius", VertexFormat::Float1),
@@ -94,7 +102,7 @@ impl Quad {
             }],
             attributes,
             shader,
-            mq::PipelineParams::default(),
+            PipelineParams::default(),
         )
     }
 }
@@ -130,7 +138,7 @@ impl Pipeline {
         );
 
         ctx.buffer_update(
-            self.bindings.vertex_buffers[0],
+            self.bindings.vertex_buffers[1],
             BufferSource::slice(instances),
         );
 
@@ -139,11 +147,11 @@ impl Pipeline {
             .cycle()
             .take(instances.len() * 6)
             .collect();
+        
         ctx.buffer_update(self.bindings.index_buffer, BufferSource::slice(&indices));
-
+        
         ctx.apply_pipeline(&self.pipeline);
         ctx.apply_bindings(&self.bindings);
-
         ctx.apply_uniforms(UniformsSource::table(&Uniforms {
             transform: *viewport.projection().as_ref(),
             scale: viewport.scale_factor() as f32,
