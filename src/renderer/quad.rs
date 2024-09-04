@@ -1,6 +1,7 @@
 use bytemuck::{Pod, Zeroable};
 use iced_core::{Rectangle, Transformation};
 use iced_graphics::Viewport;
+use macroquad::math::Mat4;
 
 use crate::mq::{self, *};
 
@@ -65,7 +66,7 @@ impl Quad {
         // Create an empty, dynamic instance buffer to store quad data.
         let quad_property_vertex_buffer = ctx.new_buffer(
             BufferType::VertexBuffer,
-            BufferUsage::Dynamic,
+            BufferUsage::Stream,
             BufferSource::empty::<Quad>(MAX_QUADS),
         );
 
@@ -173,7 +174,30 @@ impl Pipeline {
                 //
                 // see: pg 465 in learopengl
 
-                *viewport.projection().as_ref()
+                // *viewport.projection().as_ref()
+
+                let width = viewport.physical_width() as f32 / 10.0;
+                let height = viewport.physical_height() as f32 / 10.0;
+
+                *Mat4::orthographic_rh_gl(
+                    -width / 2.0, 
+                    width / 2.0, 
+                    -height / 2.0, 
+                    height / 2.0,
+                    -1.0, 
+                    1.0
+                ).as_ref()     
+
+                // let ar = (viewport.physical_width() as f32 / viewport.physical_height() as f32);
+
+                // *Mat4::orthographic_rh_gl(
+                //     0., 
+                //     ar , 
+                //     0., 
+                //     0.,
+                //     -1.0, 
+                //     1.0
+                // ).as_ref()       
             },
             scale: viewport.scale_factor() as f32,
             screen_height: target_height,
