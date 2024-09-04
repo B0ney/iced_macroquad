@@ -1,63 +1,32 @@
 uniform mat4 u_Transform;
 uniform float u_Scale;
 
-in vec2 i_Pos;
-in vec2 i_Scale;
-// in vec4 i_Color;
-in vec4 i_BorderColor;
-in vec4 i_BorderRadius;
-in float i_BorderWidth;
+in vec4 i_color;
+in vec2 i_pos;
+in vec2 i_size;
+
+in vec2 i_inst_pos;
 
 out vec4 v_Color;
-out vec4 v_BorderColor;
 out vec2 v_Pos;
 out vec2 v_Scale;
-out vec4 v_BorderRadius;
-out float v_BorderWidth;
-
-vec2 positions[4] = vec2[](
-    vec2(0.0, 0.0),
-    vec2(0.0, 1.0),
-    vec2(1.0, 0.0),
-    vec2(1.0, 1.0)
-);
 
 void main() {
-    vec2 q_Pos = positions[gl_VertexID];
-    vec2 p_Pos = i_Pos * u_Scale;
-    vec2 p_Scale = i_Scale  * u_Scale;
-
-    vec2 snap = vec2(0.0, 0.0);
-
-    if (p_Scale.x == 1.0) {
-        snap.x = round(p_Pos.x) - p_Pos.x;
-    };
-
-    if (p_Scale.y == 1.0) {
-        snap.y = round(p_Pos.y) - p_Pos.y;
-    };
-
-    float min_BorderRadius = min(i_Scale.x, i_Scale.y) / 2.0;
-    vec4 i_BorderRadius = vec4(
-        min(i_BorderRadius.x, min_BorderRadius),
-        min(i_BorderRadius.y, min_BorderRadius),
-        min(i_BorderRadius.z, min_BorderRadius),
-        min(i_BorderRadius.w, min_BorderRadius)
-    );
+    vec2 q_Pos = i_inst_pos;
+    vec2 p_Pos = i_pos * u_Scale;
+    vec2 p_Scale = i_size * u_Scale;
 
     mat4 i_Transform = mat4(
         vec4(p_Scale.x + 1.0, 0.0, 0.0, 0.0),
         vec4(0.0, p_Scale.y + 1.0, 0.0, 0.0),
         vec4(0.0, 0.0, 1.0, 0.0),
-        vec4(p_Pos - vec2(0.5, 0.5) + snap, 0.0, 1.0)
+        vec4(p_Pos + (vec2(p_Scale.x * 0.5, p_Scale.y * 0.5)), 0.0, 1.0)
     );
 
-    v_Color = vec4(1.0, 1.0, 1.0, 0.5);
-    v_BorderColor = i_BorderColor;
-    v_Pos = i_Pos * u_Scale * snap;
+    v_Color = i_color;
+    v_Pos = i_pos * u_Scale;
     v_Scale = p_Scale;
-    v_BorderRadius = i_BorderRadius * u_Scale;
-    v_BorderWidth = i_BorderWidth * u_Scale;
 
+    // projection * model (position)
     gl_Position = u_Transform * i_Transform * vec4(q_Pos, 0.0, 1.0);
 }

@@ -1,4 +1,4 @@
-use iced_core::{renderer, Background, Rectangle, Transformation};
+use iced_core::{renderer, Background, Color, Rectangle, Transformation};
 use iced_graphics::layer;
 
 pub type Stack = layer::Stack<Layer>;
@@ -21,11 +21,15 @@ impl Layer {
         let bounds = quad.bounds * transformation;
 
         self.quads.push(quad::Quad {
+            color: match background { // todo: gradients
+                Background::Color(color) => color.into_linear(),
+                Background::Gradient(_) => Color::from_linear_rgba(1., 1., 0., 0.5).into_linear(),
+            },
             position: bounds.position().into(),
             size: bounds.size().into(),
-            border_color: quad.border.color.into_linear(),
-            border_radius: quad.border.radius.into(),
-            border_width: quad.border.width,
+            // border_color: quad.border.color.into_linear(),
+            // border_radius: quad.border.radius.into(),
+            // border_width: quad.border.width,
             // shadow_color: quad.shadow.color.into_linear(),
             // shadow_offset: quad.shadow.offset.into(),
             // shadow_blur_radius: quad.shadow.blur_radius,
