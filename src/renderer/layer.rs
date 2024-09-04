@@ -21,9 +21,9 @@ impl Layer {
         let bounds = quad.bounds * transformation;
 
         self.quads.push(quad::Quad {
-            color: match background { // todo: gradients
-                Background::Color(color) => color.into_linear(),
-                Background::Gradient(_) => Color::from_linear_rgba(1., 1., 0., 0.5).into_linear(),
+            color: match background {
+                Background::Color(Color { r, g, b, a }) => [r, g, b, a],
+                Background::Gradient(_) => [0.0, 0.0, 0.0, 1.0], // todo: gradients
             },
             position: bounds.position().into(),
             size: bounds.size().into(),
