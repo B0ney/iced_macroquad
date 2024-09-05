@@ -27,14 +27,18 @@ impl Layer {
             },
             position: bounds.position().into(),
             size: bounds.size().into(),
-            // border_color: quad.border.color.into_linear(),
-            // border_radius: quad.border.radius.into(),
-            // border_width: quad.border.width,
+            border_color: arr(quad.border.color),
+            border_radius: quad.border.radius.into(),
+            border_width: quad.border.width,
             // shadow_color: quad.shadow.color.into_linear(),
             // shadow_offset: quad.shadow.offset.into(),
             // shadow_blur_radius: quad.shadow.blur_radius,
         });
     }
+}
+
+pub fn arr(Color { r, g, b, a }: Color) -> [f32; 4] {
+    [r, g, b, a]
 }
 
 impl iced_graphics::Layer for Layer {

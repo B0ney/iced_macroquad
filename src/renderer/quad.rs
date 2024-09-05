@@ -20,14 +20,15 @@ pub struct Quad {
 
     /// The size of the [`Quad`].
     pub size: [f32; 2],
-    // /// The border color of the [`Quad`], in __linear RGB__.
-    // pub border_color: [f32; 4],
 
-    // /// The border radii of the [`Quad`].
-    // pub border_radius: [f32; 4],
+    /// The border color of the [`Quad`]
+    pub border_color: [f32; 4],
 
-    // /// The border width of the [`Quad`].
-    // pub border_width: f32,
+    /// The border radii of the [`Quad`].
+    pub border_radius: [f32; 4],
+
+    /// The border width of the [`Quad`].
+    pub border_width: f32,
     // /// The shadow color of the [`Quad`].
     // pub shadow_color: [f32; 4],
 
@@ -101,9 +102,9 @@ impl Quad {
             VertexAttribute::with_buffer("i_color", VertexFormat::Float4, 1),
             VertexAttribute::with_buffer("i_pos", VertexFormat::Float2, 1),
             VertexAttribute::with_buffer("i_size", VertexFormat::Float2, 1),
-            // VertexAttribute::with_buffer("i_BorderColor", VertexFormat::Float4, 0),
-            // VertexAttribute::with_buffer("i_BorderRadius", VertexFormat::Float4, 0),
-            // VertexAttribute::with_buffer("i_BorderWidth", VertexFormat::Float1, 0),
+            VertexAttribute::with_buffer("i_border_color", VertexFormat::Float4, 1),
+            VertexAttribute::with_buffer("i_border_radius", VertexFormat::Float4, 1),
+            VertexAttribute::with_buffer("i_border_width", VertexFormat::Float1, 1),
             // VertexAttribute::new("i_shadow_color", VertexFormat::Float4),
             // VertexAttribute::new("i_shadow_offset", VertexFormat::Float2),
             // VertexAttribute::new("i_shadow_blur_radius", VertexFormat::Float1),
@@ -119,7 +120,21 @@ impl Quad {
             ],
             attributes,
             shader,
-            PipelineParams::default(),
+            PipelineParams {
+                color_blend: Some(BlendState::new(
+                    Equation::Add,
+                    BlendFactor::Value(BlendValue::SourceAlpha),
+                    BlendFactor::OneMinusValue(BlendValue::SourceAlpha))
+                ),
+                alpha_blend: Some(BlendState::new(
+                    Equation::Add,
+                    BlendFactor::Zero,
+                    BlendFactor::One)
+                ),
+                front_face_order: FrontFaceOrder::Clockwise,
+            
+                ..Default::default()
+            },
         )
     }
 }
@@ -164,6 +179,18 @@ impl Pipeline {
             screen_height: target_height,
             ..Default::default()
         }));
+
+        // Resize quad instance buffer if there are more instances
+        let bytes = instances.len() * size_of::<Quad>();
+        if ctx.buffer_size(self.bindings.vertex_buffers[1]) < bytes {
+            ctx.delete_buffer(self.bindings.vertex_buffers[1]);
+
+            self.bindings.vertex_buffers[1] = ctx.new_buffer(
+                BufferType::VertexBuffer,
+                BufferUsage::Stream,
+                BufferSource::empty::<Quad>(instances.len()),
+            );
+        }
 
         // Update quad buffer with quads from instances
         ctx.buffer_update(
