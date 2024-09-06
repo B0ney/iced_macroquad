@@ -8,13 +8,11 @@ use iced_runtime::{user_interface::Cache, UserInterface};
 use crate::mq::CursorIcon;
 
 use crate::context::{global, Context};
-use crate::renderer::Canvas;
 use crate::{convert, Renderer};
 
 pub struct Interface<Message, Theme = iced_core::Theme> {
     in_events: Vec<iced_core::Event>,
     ui_cache: Option<Cache>,
-    canvas: Canvas,
     theme: Theme,
     interacted: bool,
     _message: PhantomData<Message>,
@@ -31,7 +29,6 @@ impl<Message, Theme> Interface<Message, Theme> {
         Self {
             in_events: Vec::new(),
             ui_cache: None,
-            canvas: Canvas::new(),
             theme,
             interacted: false,
             _message: PhantomData,
@@ -56,12 +53,13 @@ impl<Message, Theme> Interface<Message, Theme> {
         messages: &mut Vec<Message>,
         ui: Element<'_, Message, Theme, Renderer>,
     ) {
+        let viewport = ctx.viewport();
         // Build the interface.
         let mut interface = UserInterface::build(
             ui,
-            ctx.viewport().logical_size(),
+            viewport.logical_size(),
             self.ui_cache.take().unwrap_or_default(),
-            &mut self.canvas,
+            &mut ctx.renderer,
         );
 
         // Fetch all external inputs.
@@ -73,13 +71,13 @@ impl<Message, Theme> Interface<Message, Theme> {
         let (_, _statuses) = interface.update(
             &self.in_events,
             cursor,
-            &mut self.canvas,
+            &mut ctx.renderer,
             &mut ctx.clipboard,
             messages,
         );
 
         // Draw the interface onto the canvas.
-        let interaction = interface.draw(&mut self.canvas, &self.theme, &Style::default(), cursor);
+        let interaction = interface.draw(&mut ctx.renderer, &self.theme, &Style::default(), cursor);
 
         // Update mouse cursor.
         if interaction == Interaction::None {
@@ -96,6 +94,6 @@ impl<Message, Theme> Interface<Message, Theme> {
         self.ui_cache = Some(interface.into_cache());
 
         // Render what's drawn on the canvas to the screen.
-        ctx.render(&mut self.canvas);
+        ctx.present(&viewport);
     }
 }

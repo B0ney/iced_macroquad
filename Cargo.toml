@@ -12,8 +12,10 @@ iced_graphics = { git = "https://github.com/iced-rs/iced" }
 iced_widget = { git = "https://github.com/iced-rs/iced" }
 # iced_mq_runtime = { path = "runtime" }
 iced_runtime = { git = "https://github.com/iced-rs/iced" }
+iced_tiny_skia = { git = "https://github.com/iced-rs/iced" }
+
 rustc-hash = "2.0.0"
-macroquad = "0.4.13"
+macroquad = "=0.4.13"
 
 [dependencies]
 macroquad.workspace = true
@@ -21,4 +23,6 @@ iced_graphics.workspace = true
 iced_core.workspace = true
 iced_widget.workspace = true
 iced_runtime.workspace = true
+iced_tiny_skia.workspace = true
 bytemuck = { version = "1.9", features = ["derive"] }
+tiny-skia = "0.11.4"
