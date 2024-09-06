@@ -2,10 +2,9 @@ use iced_core::{Font, Pixels, Size};
 use iced_graphics::Viewport;
 use iced_tiny_skia;
 
-use crate::clipboard::Clipboard;
 use crate::event_handler::{EventProxy, EventProxyWrapper};
 
-use crate::mq::window::{dpi_scale, screen_size, set_mouse_cursor};
+use crate::mq::window::{clipboard_get, clipboard_set, dpi_scale, screen_size, set_mouse_cursor};
 use crate::mq::CursorIcon;
 
 use crate::macroquad::input::mouse_position;
@@ -59,6 +58,19 @@ impl Context {
 
     pub fn viewport(&self) -> Viewport {
         Viewport::with_physical_size(self.screen_size().into(), self.dpi_scale())
+    }
+}
+
+#[derive(Default)]
+pub struct Clipboard;
+
+impl iced_core::Clipboard for Clipboard {
+    fn read(&self, _kind: iced_core::clipboard::Kind) -> Option<String> {
+        clipboard_get()
+    }
+
+    fn write(&mut self, _kind: iced_core::clipboard::Kind, contents: String) {
+        clipboard_set(&contents)
     }
 }
 
