@@ -1,8 +1,8 @@
+mod clipboard;
 mod context;
 mod convert;
 mod event_handler;
 mod interface;
-mod clipboard;
 
 use macroquad;
 use macroquad::miniquad as mq;
