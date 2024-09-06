@@ -7,12 +7,12 @@ edition = "2021"
 # members = ["runtime"]
 
 [workspace.dependencies]
-iced_core = { git = "https://github.com/iced-rs/iced" }
-iced_graphics = { git = "https://github.com/iced-rs/iced" }
-iced_widget = { git = "https://github.com/iced-rs/iced" }
+iced_core = { git = "https://github.com/B0ney/iced", branch = "tiny-skia-color-profile" }
+iced_graphics = { git = "https://github.com/B0ney/iced", branch = "tiny-skia-color-profile" }
+iced_widget = { git = "https://github.com/B0ney/iced", branch = "tiny-skia-color-profile" }
 # iced_mq_runtime = { path = "runtime" }
-iced_runtime = { git = "https://github.com/iced-rs/iced" }
-iced_tiny_skia = { git = "https://github.com/iced-rs/iced" }
+iced_runtime = { git = "https://github.com/B0ney/iced", branch = "tiny-skia-color-profile" }
+iced_tiny_skia = {  git = "https://github.com/B0ney/iced", branch = "tiny-skia-color-profile" }
 
 rustc-hash = "2.0.0"
 macroquad = "=0.4.13"

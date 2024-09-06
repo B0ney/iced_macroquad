@@ -576,7 +576,7 @@ checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
 [[package]]
 name = "iced_core"
 version = "0.13.0-dev"
-source = "git+https://github.com/iced-rs/iced#9426418adbaac40f584fe16b623521a3a21a1a4c"
+source = "git+https://github.com/B0ney/iced?branch=tiny-skia-color-profile#e2ab5196b4225c1457b8b1c9bb492d3d83d62100"
 dependencies = [
  "bitflags 2.6.0",
  "bytes",
@@ -594,7 +594,7 @@ dependencies = [
 [[package]]
 name = "iced_futures"
 version = "0.13.0-dev"
-source = "git+https://github.com/iced-rs/iced#9426418adbaac40f584fe16b623521a3a21a1a4c"
+source = "git+https://github.com/B0ney/iced?branch=tiny-skia-color-profile#e2ab5196b4225c1457b8b1c9bb492d3d83d62100"
 dependencies = [
  "futures",
  "iced_core",
@@ -607,7 +607,7 @@ dependencies = [
 [[package]]
 name = "iced_graphics"
 version = "0.13.0-dev"
-source = "git+https://github.com/iced-rs/iced#9426418adbaac40f584fe16b623521a3a21a1a4c"
+source = "git+https://github.com/B0ney/iced?branch=tiny-skia-color-profile#e2ab5196b4225c1457b8b1c9bb492d3d83d62100"
 dependencies = [
  "bitflags 2.6.0",
  "bytemuck",
@@ -640,7 +640,7 @@ dependencies = [
 [[package]]
 name = "iced_renderer"
 version = "0.13.0-dev"
-source = "git+https://github.com/iced-rs/iced#9426418adbaac40f584fe16b623521a3a21a1a4c"
+source = "git+https://github.com/B0ney/iced?branch=tiny-skia-color-profile#e2ab5196b4225c1457b8b1c9bb492d3d83d62100"
 dependencies = [
  "iced_graphics",
  "log",
@@ -650,7 +650,7 @@ dependencies = [
 [[package]]
 name = "iced_runtime"
 version = "0.13.0-dev"
-source = "git+https://github.com/iced-rs/iced#9426418adbaac40f584fe16b623521a3a21a1a4c"
+source = "git+https://github.com/B0ney/iced?branch=tiny-skia-color-profile#e2ab5196b4225c1457b8b1c9bb492d3d83d62100"
 dependencies = [
  "bytes",
  "iced_core",
@@ -662,7 +662,7 @@ dependencies = [
 [[package]]
 name = "iced_tiny_skia"
 version = "0.13.0-dev"
-source = "git+https://github.com/iced-rs/iced#9426418adbaac40f584fe16b623521a3a21a1a4c"
+source = "git+https://github.com/B0ney/iced?branch=tiny-skia-color-profile#e2ab5196b4225c1457b8b1c9bb492d3d83d62100"
 dependencies = [
  "bytemuck",
  "cosmic-text",
@@ -677,7 +677,7 @@ dependencies = [
 [[package]]
 name = "iced_widget"
 version = "0.13.0-dev"
-source = "git+https://github.com/iced-rs/iced#9426418adbaac40f584fe16b623521a3a21a1a4c"
+source = "git+https://github.com/B0ney/iced?branch=tiny-skia-color-profile#e2ab5196b4225c1457b8b1c9bb492d3d83d62100"
 dependencies = [
  "iced_renderer",
  "iced_runtime",

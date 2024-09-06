@@ -11,7 +11,7 @@ use crate::mq::CursorIcon;
 use crate::macroquad::input::mouse_position;
 
 pub(crate) struct Context {
-    pub renderer: iced_tiny_skia::Renderer,
+    pub renderer: crate::Renderer,
     pub compositor: renderer::Compositor,
     pub clipboard: Clipboard,
     pub input_subscriber_id: usize,
@@ -23,7 +23,7 @@ impl Context {
 
         Self {
             input_subscriber_id: macroquad::input::utils::register_input_subscriber(),
-            renderer: iced_tiny_skia::Renderer::new(Font::DEFAULT, Pixels(12.0)),
+            renderer: iced_tiny_skia::Renderer::new(Font::DEFAULT, Pixels(24.0)),
             compositor: renderer::Compositor::new(Size::new(width as u32, height as u32)),
             clipboard: Clipboard::default(),
         }
@@ -88,9 +88,10 @@ pub(crate) mod global {
 }
 
 mod renderer {
+    use crate::Renderer;
     use iced_core::{Color, Rectangle, Size};
     use iced_graphics::{damage, Viewport};
-    use iced_tiny_skia::{Layer, Renderer};
+    use iced_tiny_skia::Layer;
     use macroquad::texture::Texture2D;
 
     pub fn create_texture(size: Size<u32>, buffer: &[u32]) -> Texture2D {
