@@ -1,5 +1,5 @@
-uniform mat4 u_Transform;
-uniform float u_Scale;
+uniform mat4 u_transform;
+uniform float u_scale;
 
 in vec2 i_inst_pos;
 
@@ -22,8 +22,8 @@ out float v_border_width;
 
 void main() {
     vec2 q_Pos = i_inst_pos;
-    vec2 p_Pos = i_pos * u_Scale;
-    vec2 p_Scale = i_size * u_Scale;
+    vec2 p_Pos = i_pos * u_scale;
+    vec2 p_Scale = i_size * u_scale;
 
     // vec2 snap = vec2(0.0, 0.0);
 
@@ -45,11 +45,11 @@ void main() {
 
 
     v_color = i_color;
-    v_pos = i_pos * u_Scale;
-    v_scale = i_size * u_Scale;
+    v_pos = i_pos * u_scale;
+    v_scale = i_size * u_scale;
     v_border_color = i_border_color;
-    v_border_radius = border_radius * u_Scale;
-    v_border_width = i_border_width * u_Scale;
+    v_border_radius = border_radius * u_scale;
+    v_border_width = i_border_width * u_scale;
 
 
     mat4 i_Transform = mat4(
@@ -59,5 +59,5 @@ void main() {
         vec4(p_Pos - vec2(0.5), 0.0, 1.0)
     );
 
-    gl_Position = u_Transform * i_Transform * vec4(q_Pos, 0.0, 1.0);
+    gl_Position = u_transform * i_Transform * vec4(q_Pos, 0.0, 1.0);
 }

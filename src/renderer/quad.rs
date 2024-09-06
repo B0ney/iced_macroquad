@@ -160,18 +160,15 @@ impl Pipeline {
         &mut self,
         ctx: &mut Context,
         instances: &[Quad],
-        mut bounds: Rectangle<u32>,
+        bounds: Rectangle<u32>,
         viewport: &Viewport,
     ) {
-        let target_height = viewport.physical_height();
-        bounds.height = bounds.height.min(target_height);
-
         ctx.apply_pipeline(&self.pipeline);
         ctx.apply_bindings(&self.bindings);
 
         ctx.apply_uniforms(UniformsSource::table(&Uniforms {
             transform: *viewport.projection().as_ref(), // see: pg 465 in learopengl
-            scale: viewport.scale_factor() as f32,
+            scale: 1.0,
             ..Default::default()
         }));
 
@@ -196,7 +193,7 @@ impl Pipeline {
         // Clip bounds.
         ctx.apply_scissor_rect(
             bounds.x as i32,
-            (target_height - (bounds.y + bounds.height)) as i32,
+            (bounds.y + bounds.height) as i32,
             bounds.width as i32,
             bounds.height as i32,
         );
@@ -227,8 +224,8 @@ impl Uniforms {
     fn uniforms() -> UniformBlockLayout {
         UniformBlockLayout {
             uniforms: vec![
-                UniformDesc::new("u_Transform", UniformType::Mat4),
-                UniformDesc::new("u_Scale", UniformType::Float1),
+                UniformDesc::new("u_transform", UniformType::Mat4),
+                UniformDesc::new("u_scale", UniformType::Float1),
             ],
         }
     }
