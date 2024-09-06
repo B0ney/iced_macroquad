@@ -1,4 +1,4 @@
-use macroquad::miniquad::{self as mq, CursorIcon};
+use crate::mq;
 
 use iced_core::keyboard::{key::Named, Key, Location, Modifiers};
 use iced_core::mouse::{Button, Interaction};
@@ -201,18 +201,18 @@ pub fn touch(phase: mq::TouchPhase, id: u64, x: f32, y: f32) -> touch::Event {
     }
 }
 
-pub fn cursor_icon(icon: Interaction) -> CursorIcon {
+pub fn cursor_icon(icon: Interaction) -> mq::CursorIcon {
     match icon {
-        Interaction::None => CursorIcon::Default,
-        Interaction::Idle => CursorIcon::Default,
-        Interaction::Pointer => CursorIcon::Pointer,
-        Interaction::Grab => CursorIcon::Move,
-        Interaction::Text => CursorIcon::Text,
-        Interaction::Crosshair => CursorIcon::Crosshair,
-        Interaction::Working => CursorIcon::Wait,
-        Interaction::ResizingHorizontally => CursorIcon::EWResize,
-        Interaction::ResizingVertically => CursorIcon::NSResize,
-        Interaction::NotAllowed => CursorIcon::NotAllowed,
-        Interaction::ZoomIn | Interaction::Grabbing => CursorIcon::Default,
+        Interaction::None => mq::CursorIcon::Default,
+        Interaction::Idle => mq::CursorIcon::Default,
+        Interaction::Pointer => mq::CursorIcon::Pointer,
+        Interaction::Grab => mq::CursorIcon::Move,
+        Interaction::Text => mq::CursorIcon::Text,
+        Interaction::Crosshair => mq::CursorIcon::Crosshair,
+        Interaction::Working => mq::CursorIcon::Wait,
+        Interaction::ResizingHorizontally => mq::CursorIcon::EWResize,
+        Interaction::ResizingVertically => mq::CursorIcon::NSResize,
+        Interaction::NotAllowed => mq::CursorIcon::NotAllowed,
+        Interaction::ZoomIn | Interaction::Grabbing => mq::CursorIcon::Default,
     }
 }

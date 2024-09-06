@@ -1,4 +1,4 @@
-use macroquad::miniquad::window::{clipboard_get, clipboard_set};
+use crate::mq::window::{clipboard_get, clipboard_set};
 
 #[derive(Default)]
 pub struct Clipboard;
