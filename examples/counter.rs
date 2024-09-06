@@ -1,6 +1,8 @@
-use iced_macroquad::widget::{button, row, text};
+use iced_macroquad::alignment::Horizontal;
+use iced_macroquad::widget::{button, column, text};
 use iced_macroquad::Interface;
 
+use iced_widget::center;
 use macroquad::prelude::*;
 
 #[derive(Debug, Clone)]
@@ -29,13 +31,18 @@ async fn main() {
             }
         }
 
+        clear_background(WHITE);
+
         ui.view(
             &mut messages,
-            row![
-                button("Add +").width(32).height(16).on_press(Message::Add),
-                text(counter).width(32),
-                button("Sub -").width(32).height(16).on_press(Message::Sub),
-            ],
+            center(
+                column![
+                    button("Add +").on_press(Message::Add),
+                    text(counter),
+                    button("Sub -").on_press(Message::Sub),
+                ]
+                .align_x(Horizontal::Center),
+            ),
         );
 
         next_frame().await
