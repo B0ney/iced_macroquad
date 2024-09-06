@@ -25,6 +25,15 @@ void main() {
     vec2 p_Pos = i_pos * u_Scale;
     vec2 p_Scale = i_size * u_Scale;
 
+    // vec2 snap = vec2(0.0, 0.0);
+
+    // if (i_size.x == 1.0) {
+    //     snap.x = round(i_pos.x) - p_Pos.x;
+    // };
+
+    // if (i_size.y == 1.0) {
+    //     snap.y = round(i_pos.y) - p_Pos.y;
+    // };
 
     float min_border_radius = min(i_size.x, i_size.y) * 0.5;
     vec4 border_radius = vec4(
@@ -34,12 +43,6 @@ void main() {
         min(i_border_radius.w, min_border_radius )
     );
 
-    mat4 i_Transform = mat4(
-        vec4(p_Scale.x + 1.0, 0.0, 0.0, 0.0),
-        vec4(0.0, p_Scale.y + 1.0, 0.0, 0.0),
-        vec4(0.0, 0.0, 1.0, 0.0),
-        vec4(p_Pos + (vec2(p_Scale.x * 0.5, p_Scale.y * 0.5)), 0.0, 1.0)
-    );
 
     v_color = i_color;
     v_pos = i_pos * u_Scale;
@@ -48,6 +51,13 @@ void main() {
     v_border_radius = border_radius * u_Scale;
     v_border_width = i_border_width * u_Scale;
 
-    // projection * model (position)
+
+    mat4 i_Transform = mat4(
+        vec4(p_Scale.x + 1.0, 0.0, 0.0, 0.0),
+        vec4(0.0, p_Scale.y + 1.0, 0.0, 0.0),
+        vec4(0.0, 0.0, 1.0, 0.0),
+        vec4(p_Pos - vec2(0.5, 0.5), 0.0, 1.0)
+    );
+
     gl_Position = u_Transform * i_Transform * vec4(q_Pos, 0.0, 1.0);
 }
