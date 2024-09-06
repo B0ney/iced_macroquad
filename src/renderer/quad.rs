@@ -43,10 +43,10 @@ impl Quad {
     fn bindings(ctx: &mut Context) -> mq::Bindings {
         // Create static buffer to store quad vertices.
         let vertices: [[f32; 2]; 4] = [
-            [0.5, 0.5],   // bottom right
-            [0.5, -0.5],  // top right
-            [-0.5, -0.5], // top left
-            [-0.5, 0.5],  // bottom left
+            [1.0, 1.0],   // bottom right
+            [1.0, -1.0],  // top right
+            [-1.0, -1.0], // top left
+            [-1.0, 1.0],  // bottom left
         ];
 
         let vertices: [f32; 8] = bytemuck::cast(vertices);
@@ -124,15 +124,19 @@ impl Quad {
                 color_blend: Some(BlendState::new(
                     Equation::Add,
                     BlendFactor::Value(BlendValue::SourceAlpha),
-                    BlendFactor::OneMinusValue(BlendValue::SourceAlpha))
-                ),
+                    BlendFactor::OneMinusValue(BlendValue::SourceAlpha),
+                )),
+
                 alpha_blend: Some(BlendState::new(
                     Equation::Add,
-                    BlendFactor::Zero,
-                    BlendFactor::One)
-                ),
+                    BlendFactor::One,
+                    BlendFactor::OneMinusValue(BlendValue::SourceAlpha),
+                )),
+
                 front_face_order: FrontFaceOrder::Clockwise,
-            
+                color_write: (true, true, true, true),
+                primitive_type: PrimitiveType::Triangles,
+
                 ..Default::default()
             },
         )
@@ -162,21 +166,12 @@ impl Pipeline {
         let target_height = viewport.physical_height();
         bounds.height = bounds.height.min(target_height);
 
-        // Clip bounds.
-        ctx.apply_scissor_rect(
-            bounds.x as i32,
-            (target_height - (bounds.y + bounds.height)) as i32,
-            bounds.width as i32,
-            bounds.height as i32,
-        );
-
         ctx.apply_pipeline(&self.pipeline);
         ctx.apply_bindings(&self.bindings);
 
         ctx.apply_uniforms(UniformsSource::table(&Uniforms {
             transform: *viewport.projection().as_ref(), // see: pg 465 in learopengl
             scale: viewport.scale_factor() as f32,
-            screen_height: target_height,
             ..Default::default()
         }));
 
@@ -198,6 +193,14 @@ impl Pipeline {
             BufferSource::slice(instances),
         );
 
+        // Clip bounds.
+        ctx.apply_scissor_rect(
+            bounds.x as i32,
+            (target_height - (bounds.y + bounds.height)) as i32,
+            bounds.width as i32,
+            bounds.height as i32,
+        );
+
         ctx.draw(0, 6, instances.len() as i32);
     }
 }
@@ -206,18 +209,16 @@ impl Pipeline {
 #[derive(Debug, Clone, Copy, Zeroable, Pod)]
 struct Uniforms {
     pub transform: [f32; 16],
-    pub model: [f32; 16],
     pub scale: f32,
-    pub screen_height: u32,
+    // _padding: [f32; 3],
 }
 
 impl Default for Uniforms {
     fn default() -> Self {
         Self {
             transform: *Transformation::IDENTITY.as_ref(),
-            model: *Transformation::IDENTITY.as_ref(),
             scale: 1.0,
-            screen_height: 0,
+            // _padding: [0.0; 3],
         }
     }
 }
@@ -228,7 +229,6 @@ impl Uniforms {
             uniforms: vec![
                 UniformDesc::new("u_Transform", UniformType::Mat4),
                 UniformDesc::new("u_Scale", UniformType::Float1),
-                UniformDesc::new("u_ScreenHeight", UniformType::Int1),
             ],
         }
     }

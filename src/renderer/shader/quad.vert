@@ -56,7 +56,7 @@ void main() {
         vec4(p_Scale.x + 1.0, 0.0, 0.0, 0.0),
         vec4(0.0, p_Scale.y + 1.0, 0.0, 0.0),
         vec4(0.0, 0.0, 1.0, 0.0),
-        vec4(p_Pos - vec2(0.5, 0.5), 0.0, 1.0)
+        vec4(p_Pos - vec2(0.5), 0.0, 1.0)
     );
 
     gl_Position = u_Transform * i_Transform * vec4(q_Pos, 0.0, 1.0);

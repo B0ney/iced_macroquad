@@ -11,8 +11,6 @@
 // #define gl_FragColor fragColor
 // #endif
 
-uniform float u_ScreenHeight;
-
 in vec4 v_color;
 in vec2 v_pos;
 in vec2 v_scale;
@@ -21,7 +19,7 @@ in vec4 v_border_radius;
 in float v_border_width;
 
 float rounded_box_sdf(vec2 to_center, vec2 size, float radius) {
-    return length(max(abs(to_center) - size + vec2(radius, radius), vec2(0.0, 0.0))) - radius;
+    return length(max(abs(to_center) - size + vec2(radius), vec2(0.0))) - radius;
 }
 
 float fDistance(
@@ -82,7 +80,6 @@ void main() {
         border_radius
     );
 
-    // 1.0 -
     float radius_alpha = 1.0 - smoothstep(
         max(border_radius - 0.5, 0.0), 
         border_radius + 0.5, 
