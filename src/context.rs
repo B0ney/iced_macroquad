@@ -63,27 +63,36 @@ impl Context {
 }
 
 pub(crate) mod global {
-    use std::{cell::RefCell, sync::Once};
+    use std::{
+        cell::RefCell,
+        sync::OnceLock,
+        thread::{self, ThreadId},
+    };
 
     use crate::context::Context;
 
-    thread_local! {
-        static ICED_CONTEXT: RefCell<Context> = init_single_thread(|| RefCell::new(Context::new()));
+    fn assert_single_thread() {
+        static CONTEXT_OWNER: OnceLock<ThreadId> = OnceLock::new();
+
+        let thread_id = thread::current().id();
+        assert!(
+            CONTEXT_OWNER.get_or_init(|| thread_id) == &thread_id,
+            "Already initialized from another thread."
+        )
     }
 
-    fn init_single_thread<T>(init: impl FnOnce() -> T) -> T {
-        try_init_single_thread(init).expect("Already initialized from another thread.")
-    }
+    fn iced_ctx_raw() -> *const RefCell<Context> {
+        assert_single_thread();
 
-    fn try_init_single_thread<T>(init: impl FnOnce() -> T) -> Option<T> {
-        static ONCE: Once = Once::new();
-        let mut obj = None;
-        ONCE.call_once(|| obj = Some(init()));
-        obj
+        static mut CONTEXT: Option<RefCell<Context>> = None;
+
+        let context = unsafe { &mut *std::ptr::addr_of_mut!(CONTEXT) };
+
+        context.get_or_insert_with(|| RefCell::new(Context::new()))
     }
 
     pub fn iced_ctx_mut<T>(f: impl FnOnce(&mut Context) -> T) -> T {
-        ICED_CONTEXT.with_borrow_mut(f)
+        f(&mut unsafe { &*iced_ctx_raw() }.borrow_mut())
     }
 }
 
