@@ -10,7 +10,7 @@ use crate::mq::CursorIcon;
 use crate::macroquad::input::mouse_position;
 
 pub(crate) struct Context {
-    pub renderer: crate::Renderer,
+    pub renderer: crate::iced::Renderer,
     pub compositor: renderer::Compositor,
     pub clipboard: Clipboard,
     pub input_subscriber_id: usize,
@@ -100,7 +100,7 @@ pub(crate) mod global {
 }
 
 mod renderer {
-    use crate::Renderer;
+    use crate::iced::Renderer;
     use iced_core::{Color, Rectangle, Size};
     use iced_graphics::{damage, Viewport};
     use iced_tiny_skia::Layer;

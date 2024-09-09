@@ -3,14 +3,10 @@ name = "iced_macroquad"
 version = "0.1.0"
 edition = "2021"
 
-# [workspace]
-# members = ["runtime"]
-
 [workspace.dependencies]
 iced_core = { git = "https://github.com/B0ney/iced", branch = "tiny-skia-color-profile" }
 iced_graphics = { git = "https://github.com/B0ney/iced", branch = "tiny-skia-color-profile" }
 iced_widget = { git = "https://github.com/B0ney/iced", branch = "tiny-skia-color-profile" }
-# iced_mq_runtime = { path = "runtime" }
 iced_runtime = { git = "https://github.com/B0ney/iced", branch = "tiny-skia-color-profile" }
 iced_tiny_skia = {  git = "https://github.com/B0ney/iced", branch = "tiny-skia-color-profile" }
 

@@ -5,10 +5,11 @@ use iced_core::renderer::Style;
 use iced_core::{Element, Point};
 use iced_runtime::{user_interface::Cache, UserInterface};
 
+use crate::iced::Renderer;
 use crate::mq::CursorIcon;
 
 use crate::context::{global, Context};
-use crate::{convert, Renderer};
+use crate::convert;
 
 pub struct Interface<Message, Theme = iced_core::Theme> {
     in_events: Vec<iced_core::Event>,

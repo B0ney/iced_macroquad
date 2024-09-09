@@ -1,8 +1,8 @@
-use iced_macroquad::alignment::Horizontal;
-use iced_macroquad::widget::{button, column, text};
-use iced_macroquad::Interface;
+use iced_macroquad::{iced, Interface};
 
-use iced_widget::center;
+use iced::alignment::Horizontal;
+use iced::widget::{button, column, text, center};
+
 use macroquad::prelude::*;
 
 #[derive(Debug, Clone)]
