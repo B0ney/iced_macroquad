@@ -32,6 +32,11 @@ pub mod font {
             font_system.load_font(font)
         }
     }
+
+    pub fn configure_defaults(font: Font, text_size: impl Into<iced_core::Pixels>) {
+        // TODO: Add ability to change after context is initialized
+        let _ = crate::context::DEFAULTS.set((font, text_size.into()));
+    }
 }
 
 #[allow(hidden_glob_reexports)]
@@ -68,7 +73,6 @@ pub mod overlay {
 
 pub mod advanced {
     pub use iced_core::widget::*;
-    
     pub use iced_core::clipboard::{self, Clipboard};
     pub use iced_core::image;
     pub use iced_core::layout::{self, Layout};

@@ -1,3 +1,5 @@
+use std::sync::OnceLock;
+
 use iced_core::{Font, Pixels, Size};
 use iced_graphics::Viewport;
 use iced_tiny_skia;
@@ -9,6 +11,8 @@ use crate::mq::CursorIcon;
 
 use crate::macroquad::input::mouse_position;
 
+pub(crate) static DEFAULTS: OnceLock<(Font, Pixels)> = OnceLock::new();
+
 pub(crate) struct Context {
     pub renderer: crate::iced::Renderer,
     pub compositor: renderer::Compositor,
@@ -19,10 +23,11 @@ pub(crate) struct Context {
 impl Context {
     fn new() -> Self {
         let (width, height) = screen_size();
+        let (font, text_size) = *DEFAULTS.get_or_init(|| (Font::DEFAULT, Pixels(24.0)));
 
         Self {
             input_subscriber_id: macroquad::input::utils::register_input_subscriber(),
-            renderer: iced_tiny_skia::Renderer::new(Font::DEFAULT, Pixels(24.0)),
+            renderer: iced_tiny_skia::Renderer::new(font, text_size),
             compositor: renderer::Compositor::new(Size::new(width as u32, height as u32)),
             clipboard: Clipboard::default(),
         }
