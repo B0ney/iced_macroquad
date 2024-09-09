@@ -5,7 +5,10 @@
 pub use iced_core::alignment;
 pub use iced_core::border;
 pub use iced_core::event;
+pub use iced_core::color;
 pub use iced_core::gradient;
+pub use iced_core::padding;
+pub use iced_core::theme;
 pub use iced_core::{
     Alignment, Background, Border, Color, ContentFit, Degrees, Gradient, Length, Padding, Pixels,
     Point, Radians, Rectangle, Rotation, Shadow, Size, Theme, Transformation, Vector,
