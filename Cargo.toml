@@ -13,6 +13,12 @@ iced_tiny_skia = {  git = "https://github.com/B0ney/iced", branch = "tiny-skia-c
 rustc-hash = "2.0.0"
 macroquad = "=0.4.13"
 
+[features]
+image = ["iced_widget/image", "iced_tiny_skia/image"]
+svg = ["iced_widget/svg", "iced_tiny_skia/svg"]
+canvas = ["iced_widget/canvas", "iced_tiny_skia/geometry"]
+lazy = ["iced_widget/lazy"]
+
 [dependencies]
 macroquad.workspace = true
 iced_graphics.workspace = true
