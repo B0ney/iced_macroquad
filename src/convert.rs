@@ -214,5 +214,6 @@ pub fn cursor_icon(icon: Interaction) -> mq::CursorIcon {
         Interaction::ResizingVertically => mq::CursorIcon::NSResize,
         Interaction::NotAllowed => mq::CursorIcon::NotAllowed,
         Interaction::ZoomIn | Interaction::Grabbing => mq::CursorIcon::Default,
+        _ =>  mq::CursorIcon::Default // todo
     }
 }

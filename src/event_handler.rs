@@ -71,6 +71,8 @@ impl<T: EventProxy> mq::EventHandler for EventProxyWrapper<T> {
         let (key, location) = convert::key(keycode);
         self.add(Event::Keyboard(keyboard::Event::KeyPressed {
             key,
+            modified_key: keyboard::Key::Unidentified, //todo!
+            physical_key: keyboard::key::Physical::Code(keyboard::key::Code::Space), // todo
             location,
             modifiers: convert::key_mod(keymods),
             text: None,
