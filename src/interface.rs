@@ -98,3 +98,14 @@ impl<Message, Theme> Interface<Message, Theme> {
         ctx.present(&viewport);
     }
 }
+
+impl<Message, Theme> Drop for Interface<Message, Theme> {
+    fn drop(&mut self) {
+        // Interface may be dropped before we can reset the mouse icon.
+        if self.interacted {
+            global::iced_ctx_mut(|ctx| {
+                ctx.set_mouse_icon(CursorIcon::Default);
+            })
+        }
+    }
+}
