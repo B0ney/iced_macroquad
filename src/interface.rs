@@ -41,10 +41,11 @@ impl<Message, Theme> Interface<Message, Theme> {
     }
 
     /// Interact with, and view the UI. All interactions will be pushed to messages.
-    pub fn view<'a, E>(&mut self, messages: &mut Vec<Message>, ui: E)
-    where
-        E: Into<Element<'a, Message, Theme, Renderer>>,
-    {
+    pub fn view<'a>(
+        &mut self,
+        messages: &mut Vec<Message>,
+        ui: Element<'a, Message, Theme, Renderer>,
+    ) {
         global::iced_ctx_mut(|ctx| self.present(ctx, messages, ui.into()));
     }
 

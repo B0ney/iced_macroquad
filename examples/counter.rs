@@ -42,7 +42,8 @@ async fn main() {
                     button("Sub -").on_press(Message::Sub),
                 ]
                 .align_x(Horizontal::Center),
-            ),
+            )
+            .into(),
         );
 
         next_frame().await
