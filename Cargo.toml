@@ -18,6 +18,7 @@ image = ["iced_widget/image", "iced_tiny_skia/image"]
 svg = ["iced_widget/svg", "iced_tiny_skia/svg"]
 canvas = ["iced_widget/canvas", "iced_tiny_skia/geometry"]
 lazy = ["iced_widget/lazy"]
+advanced = ["iced_widget/advanced"]
 
 [dependencies]
 macroquad.workspace = true
