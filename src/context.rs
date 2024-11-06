@@ -1,9 +1,11 @@
 use std::sync::OnceLock;
 
+use iced_core::mouse::Interaction;
 use iced_core::{Font, Pixels, Size};
 use iced_graphics::Viewport;
 use iced_tiny_skia;
 
+use crate::cursor::CursorSubscriber;
 use crate::event_handler::{EventProxy, EventProxyWrapper};
 
 use crate::mq::window::{clipboard_get, clipboard_set, dpi_scale, screen_size, set_mouse_cursor};
@@ -57,10 +59,6 @@ impl Context {
         mouse_position()
     }
 
-    pub fn set_mouse_icon(&self, icon: CursorIcon) {
-        set_mouse_cursor(icon)
-    }
-
     pub fn viewport(&self) -> Viewport {
         Viewport::with_physical_size(self.screen_size().into(), self.dpi_scale())
     }
@@ -76,6 +74,14 @@ impl iced_core::Clipboard for Clipboard {
 
     fn write(&mut self, _kind: iced_core::clipboard::Kind, contents: String) {
         clipboard_set(&contents)
+    }
+}
+
+pub struct MqCursor;
+
+impl CursorSubscriber for MqCursor {
+    fn update(&mut self, icon: CursorIcon) {
+        set_mouse_cursor(icon)
     }
 }
 

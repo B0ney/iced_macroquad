@@ -5,10 +5,11 @@ use iced_core::renderer::Style;
 use iced_core::{Element, Point};
 use iced_runtime::{user_interface::Cache, UserInterface};
 
+use crate::cursor::CursorSubscriber;
 use crate::iced::Renderer;
 use crate::mq::CursorIcon;
 
-use crate::context::{global, Context};
+use crate::context::{global, Context, MqCursor};
 use crate::convert;
 
 pub struct Interface<Message, Theme = iced_core::Theme> {
@@ -46,13 +47,24 @@ impl<Message, Theme> Interface<Message, Theme> {
         messages: &mut Vec<Message>,
         ui: Element<'a, Message, Theme, Renderer>,
     ) {
-        global::iced_ctx_mut(|ctx| self.present(ctx, messages, ui.into()));
+        global::iced_ctx_mut(|ctx| self.present(ctx, messages, &mut MqCursor, ui.into()));
+    }
+
+    /// Interact with, and view the UI. All interactions will be pushed to messages.
+    pub fn view_advanced<'a>(
+        &mut self,
+        messages: &mut Vec<Message>,
+        cursor: &mut dyn CursorSubscriber,
+        ui: Element<'a, Message, Theme, Renderer>,
+    ) {
+        global::iced_ctx_mut(|ctx| self.present(ctx, messages, cursor, ui.into()));
     }
 
     fn present(
         &mut self,
         ctx: &mut Context,
         messages: &mut Vec<Message>,
+        cursor_icon: &mut dyn CursorSubscriber,
         ui: Element<'_, Message, Theme, Renderer>,
     ) {
         let viewport = ctx.viewport();
@@ -85,10 +97,10 @@ impl<Message, Theme> Interface<Message, Theme> {
         if interaction == Interaction::None {
             if self.interacted {
                 self.interacted = false;
-                ctx.set_mouse_icon(CursorIcon::Default);
+                cursor_icon.reset();
             }
         } else {
-            ctx.set_mouse_icon(convert::cursor_icon(interaction));
+            cursor_icon.update(convert::cursor_icon(interaction));
             self.interacted = true;
         }
 
@@ -103,10 +115,10 @@ impl<Message, Theme> Interface<Message, Theme> {
 impl<Message, Theme> Drop for Interface<Message, Theme> {
     fn drop(&mut self) {
         // Interface may be dropped before we can reset the mouse icon.
-        if self.interacted {
-            global::iced_ctx_mut(|ctx| {
-                ctx.set_mouse_icon(CursorIcon::Default);
-            })
-        }
+        // if self.interacted {
+        //     global::iced_ctx_mut(|ctx| {
+        //         ctx.set_mouse_icon(CursorIcon::Default);
+        //     })
+        // }
     }
 }
