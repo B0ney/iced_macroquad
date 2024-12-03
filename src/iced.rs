@@ -11,7 +11,7 @@ pub use iced_core::padding;
 pub use iced_core::theme;
 pub use iced_core::{
     Alignment, Background, Border, Color, ContentFit, Degrees, Gradient, Length, Padding, Pixels,
-    Point, Radians, Rectangle, Rotation, Shadow, Size, Theme, Transformation, Vector,
+    Point, Radians, Rectangle, Rotation, Shadow, Size, Theme, Transformation, Vector, Event
 };
 
 pub use alignment::Horizontal::{Left, Right};
@@ -84,7 +84,31 @@ pub mod advanced {
     pub use iced_core::text::{self, Text};
     pub use iced_core::Shell;
     pub use iced_graphics;
+    pub use iced_core as core;
 }
 
 pub type Renderer = iced_tiny_skia::Renderer<iced_tiny_skia::color_profile::RGBA>;
 pub type Element<'a, Message, Theme> = iced_core::Element<'a, Message, Theme, Renderer>;
+
+pub mod raw {
+    pub use iced_core::Element;
+}
+
+
+pub mod keyboard {
+    //! Listen and react to keyboard events.
+    pub use iced_core::keyboard::key;
+    pub use iced_core::keyboard::{Event, Key, Location, Modifiers};
+}
+
+pub mod mouse {
+    //! Listen and react to mouse events.
+    pub use iced_core::mouse::{
+        Button, Cursor, Event, Interaction, ScrollDelta,
+    };
+}
+
+pub mod touch {
+    //! Listen and react to touch events.
+    pub use iced_core::touch::{Event, Finger};
+}
