@@ -87,7 +87,7 @@ pub mod advanced {
     pub use iced_core as core;
 }
 
-pub type Renderer = iced_tiny_skia::Renderer<iced_tiny_skia::color_profile::RGBA>;
+pub type Renderer = iced_tiny_skia::Renderer;
 pub type Element<'a, Message, Theme> = iced_core::Element<'a, Message, Theme, Renderer>;
 
 pub mod raw {
