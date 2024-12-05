@@ -67,15 +67,25 @@ impl<T: EventProxy> mq::EventHandler for EventProxyWrapper<T> {
 
     fn char_event(&mut self, _character: char, _keymods: mq::KeyMods, _repeat: bool) {}
 
+    // TODO
     fn key_down_event(&mut self, keycode: mq::KeyCode, keymods: mq::KeyMods, _repeat: bool) {
         let (key, location) = convert::key(keycode);
+        
+        let text = {
+            match key.clone() {
+                keyboard::Key::Named(named) => None,
+                keyboard::Key::Character(c) => Some(c),
+                keyboard::Key::Unidentified => None,
+            }
+        };
+
         self.add(Event::Keyboard(keyboard::Event::KeyPressed {
+            modified_key: key.clone(),
+            text,
             key,
-            modified_key: keyboard::Key::Unidentified, //todo!
-            physical_key: keyboard::key::Physical::Code(keyboard::key::Code::Space), // todo
+            physical_key: convert::physical(keycode).into(),
             location,
             modifiers: convert::key_mod(keymods),
-            text: None,
         }))
     }
 

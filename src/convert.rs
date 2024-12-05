@@ -1,6 +1,7 @@
 use crate::mq;
 
-use iced_core::keyboard::{key::Named, Key, Location, Modifiers};
+use iced_core::keyboard::key::{Code, Named};
+use iced_core::keyboard::{Key, Location, Modifiers};
 use iced_core::mouse::{Button, Interaction};
 use iced_core::{touch, Point};
 
@@ -189,6 +190,151 @@ pub fn key(key: mq::KeyCode) -> (Key, Location) {
     (key, location)
 }
 
+pub enum Converted {
+    KeyCode(Code),
+    UnknownCode(u32),
+    Unknown,
+}
+
+impl From<Converted> for iced_core::keyboard::key::Physical {
+    fn from(value: Converted) -> Self {
+        use iced_core::keyboard::key::{NativeCode, Physical};
+
+        match value {
+            Converted::KeyCode(code) => Physical::Code(code),
+            Converted::UnknownCode(xkb) => Physical::Unidentified(NativeCode::Xkb(xkb)),
+            Converted::Unknown => Physical::Unidentified(NativeCode::Unidentified),
+        }
+    }
+}
+
+pub fn physical(key: mq::KeyCode) -> Converted {
+    Converted::KeyCode(match key {
+        mq::KeyCode::Space => Code::Space,
+        mq::KeyCode::Apostrophe => Code::Quote,
+        mq::KeyCode::Comma => Code::Comma,
+        mq::KeyCode::Minus => Code::Minus,
+        mq::KeyCode::Period => Code::Period,
+        mq::KeyCode::Slash => Code::Slash,
+        mq::KeyCode::Key0 => Code::Digit0,
+        mq::KeyCode::Key1 => Code::Digit1,
+        mq::KeyCode::Key2 => Code::Digit2,
+        mq::KeyCode::Key3 => Code::Digit3,
+        mq::KeyCode::Key4 => Code::Digit4,
+        mq::KeyCode::Key5 => Code::Digit5,
+        mq::KeyCode::Key6 => Code::Digit6,
+        mq::KeyCode::Key7 => Code::Digit7,
+        mq::KeyCode::Key8 => Code::Digit8,
+        mq::KeyCode::Key9 => Code::Digit9,
+        mq::KeyCode::Semicolon => Code::Semicolon,
+        mq::KeyCode::Equal => Code::Equal,
+        mq::KeyCode::A => Code::KeyA,
+        mq::KeyCode::B => Code::KeyB,
+        mq::KeyCode::C => Code::KeyC,
+        mq::KeyCode::D => Code::KeyD,
+        mq::KeyCode::E => Code::KeyE,
+        mq::KeyCode::F => Code::KeyF,
+        mq::KeyCode::G => Code::KeyG,
+        mq::KeyCode::H => Code::KeyH,
+        mq::KeyCode::I => Code::KeyI,
+        mq::KeyCode::J => Code::KeyJ,
+        mq::KeyCode::K => Code::KeyK,
+        mq::KeyCode::L => Code::KeyL,
+        mq::KeyCode::M => Code::KeyM,
+        mq::KeyCode::N => Code::KeyN,
+        mq::KeyCode::O => Code::KeyO,
+        mq::KeyCode::P => Code::KeyP,
+        mq::KeyCode::Q => Code::KeyQ,
+        mq::KeyCode::R => Code::KeyR,
+        mq::KeyCode::S => Code::KeyS,
+        mq::KeyCode::T => Code::KeyT,
+        mq::KeyCode::U => Code::KeyU,
+        mq::KeyCode::V => Code::KeyV,
+        mq::KeyCode::W => Code::KeyW,
+        mq::KeyCode::X => Code::KeyX,
+        mq::KeyCode::Y => Code::KeyY,
+        mq::KeyCode::Z => Code::KeyZ,
+        mq::KeyCode::LeftBracket => Code::BracketLeft,
+        mq::KeyCode::Backslash => Code::Backslash,
+        mq::KeyCode::RightBracket => Code::BracketRight,
+        mq::KeyCode::Escape => Code::Escape,
+        mq::KeyCode::Enter => Code::Enter,
+        mq::KeyCode::Tab => Code::Tab,
+        mq::KeyCode::Backspace => Code::Backspace,
+        mq::KeyCode::Insert => Code::Insert,
+        mq::KeyCode::Delete => Code::Delete,
+        mq::KeyCode::Right => Code::ArrowRight,
+        mq::KeyCode::Left => Code::ArrowLeft,
+        mq::KeyCode::Down => Code::ArrowDown,
+        mq::KeyCode::Up => Code::ArrowUp,
+        mq::KeyCode::PageUp => Code::PageUp,
+        mq::KeyCode::PageDown => Code::PageDown,
+        mq::KeyCode::Home => Code::Home,
+        mq::KeyCode::End => Code::End,
+        mq::KeyCode::CapsLock => Code::CapsLock,
+        mq::KeyCode::ScrollLock => Code::ScrollLock,
+        mq::KeyCode::NumLock => Code::NumLock,
+        mq::KeyCode::PrintScreen => Code::PrintScreen,
+        mq::KeyCode::Pause => Code::Pause,
+        mq::KeyCode::F1 => Code::F1,
+        mq::KeyCode::F2 => Code::F2,
+        mq::KeyCode::F3 => Code::F3,
+        mq::KeyCode::F4 => Code::F4,
+        mq::KeyCode::F5 => Code::F5,
+        mq::KeyCode::F6 => Code::F6,
+        mq::KeyCode::F7 => Code::F7,
+        mq::KeyCode::F8 => Code::F8,
+        mq::KeyCode::F9 => Code::F9,
+        mq::KeyCode::F10 => Code::F10,
+        mq::KeyCode::F11 => Code::F11,
+        mq::KeyCode::F12 => Code::F12,
+        mq::KeyCode::F13 => Code::F13,
+        mq::KeyCode::F14 => Code::F14,
+        mq::KeyCode::F15 => Code::F15,
+        mq::KeyCode::F16 => Code::F16,
+        mq::KeyCode::F17 => Code::F17,
+        mq::KeyCode::F18 => Code::F18,
+        mq::KeyCode::F19 => Code::F19,
+        mq::KeyCode::F20 => Code::F20,
+        mq::KeyCode::F21 => Code::F21,
+        mq::KeyCode::F22 => Code::F22,
+        mq::KeyCode::F23 => Code::F23,
+        mq::KeyCode::F24 => Code::F24,
+        mq::KeyCode::F25 => Code::F25,
+        mq::KeyCode::Kp0 => Code::Numpad0,
+        mq::KeyCode::Kp1 => Code::Numpad1,
+        mq::KeyCode::Kp2 => Code::Numpad2,
+        mq::KeyCode::Kp3 => Code::Numpad3,
+        mq::KeyCode::Kp4 => Code::Numpad4,
+        mq::KeyCode::Kp5 => Code::Numpad5,
+        mq::KeyCode::Kp6 => Code::Numpad6,
+        mq::KeyCode::Kp7 => Code::Numpad7,
+        mq::KeyCode::Kp8 => Code::Numpad8,
+        mq::KeyCode::Kp9 => Code::Numpad9,
+        mq::KeyCode::KpDecimal => Code::NumpadDecimal,
+        mq::KeyCode::KpDivide => Code::NumpadDivide,
+        mq::KeyCode::KpMultiply => Code::NumpadMultiply,
+        mq::KeyCode::KpSubtract => Code::NumpadSubtract,
+        mq::KeyCode::KpAdd => Code::NumpadAdd,
+        mq::KeyCode::KpEnter => Code::NumpadEnter,
+        mq::KeyCode::KpEqual => Code::NumpadEqual,
+        mq::KeyCode::LeftShift => Code::ShiftLeft,
+        mq::KeyCode::LeftControl => Code::ControlLeft,
+        mq::KeyCode::LeftAlt => Code::AltLeft,
+        mq::KeyCode::LeftSuper => Code::SuperLeft,
+        mq::KeyCode::RightShift => Code::ShiftRight,
+        mq::KeyCode::RightControl => Code::ControlRight,
+        mq::KeyCode::RightAlt => Code::AltRight,
+        mq::KeyCode::RightSuper => Code::SuperRight,
+        mq::KeyCode::Menu => Code::ContextMenu,
+        // mq::KeyCode::GraveAccent => todo!(),
+        // mq::KeyCode::World1 => todo!(),
+        // mq::KeyCode::World2 => todo!(),
+        mq::KeyCode::Unknown => return Converted::Unknown,
+        idk => return Converted::UnknownCode(idk as u32),
+    })
+}
+
 pub fn touch(phase: mq::TouchPhase, id: u64, x: f32, y: f32) -> touch::Event {
     let id = touch::Finger(id);
     let position = Point::new(x, y);
@@ -214,6 +360,6 @@ pub fn cursor_icon(icon: Interaction) -> mq::CursorIcon {
         Interaction::ResizingVertically => mq::CursorIcon::NSResize,
         Interaction::NotAllowed => mq::CursorIcon::NotAllowed,
         Interaction::ZoomIn | Interaction::Grabbing => mq::CursorIcon::Default,
-        _ =>  mq::CursorIcon::Default // todo
+        _ => mq::CursorIcon::Default, // todo
     }
 }
