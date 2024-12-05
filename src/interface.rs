@@ -2,6 +2,7 @@ use std::marker::PhantomData;
 
 use iced_core::mouse::{Cursor, Interaction};
 use iced_core::renderer::Style;
+use iced_core::widget::Operation;
 use iced_core::{Element, Point};
 use iced_runtime::{user_interface::Cache, UserInterface};
 
@@ -14,6 +15,7 @@ use crate::convert;
 
 pub struct Interface<Message, Theme = iced_core::Theme> {
     in_events: Vec<iced_core::Event>,
+    operations: Vec<Box<dyn Operation>>,
     ui_cache: Option<Cache>,
     theme: Theme,
     interacted: bool,
@@ -34,11 +36,16 @@ impl<Message, Theme> Interface<Message, Theme> {
             theme,
             interacted: false,
             _message: PhantomData,
+            operations: Vec::new(),
         }
     }
 
     pub fn set_theme(&mut self, theme: Theme) {
         self.theme = theme
+    }
+
+    pub fn operate(&mut self, operation: impl Operation + 'static) {
+        self.operations.push(Box::new(operation));
     }
 
     /// Interact with, and view the UI. All interactions will be pushed to messages.
@@ -75,6 +82,11 @@ impl<Message, Theme> Interface<Message, Theme> {
             self.ui_cache.take().unwrap_or_default(),
             &mut ctx.renderer,
         );
+
+        // Perform widget operations, if any.
+        for mut operation in self.operations.drain(..) {
+            interface.operate(&mut ctx.renderer, &mut operation);
+        }
 
         // Fetch all external inputs.
         self.in_events.clear();
