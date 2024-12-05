@@ -2,8 +2,9 @@ use std::marker::PhantomData;
 
 use iced_core::mouse::{Cursor, Interaction};
 use iced_core::renderer::Style;
-use iced_core::widget::Operation;
+use iced_core::widget::{operation, Operation};
 use iced_core::{Element, Point};
+
 use iced_runtime::{user_interface::Cache, UserInterface};
 
 use crate::cursor::CursorSubscriber;
@@ -44,6 +45,7 @@ impl<Message, Theme> Interface<Message, Theme> {
         self.theme = theme
     }
 
+    /// Perform a widget operation
     pub fn operate(&mut self, operation: impl Operation + 'static) {
         self.operations.push(Box::new(operation));
     }
@@ -84,8 +86,16 @@ impl<Message, Theme> Interface<Message, Theme> {
         );
 
         // Perform widget operations, if any.
-        for mut operation in self.operations.drain(..) {
-            interface.operate(&mut ctx.renderer, &mut operation);
+        for operation in self.operations.drain(..) {
+            let mut current_operation = Some(operation);
+
+            while let Some(mut operation) = current_operation.take() {
+                interface.operate(&mut ctx.renderer, &mut operation);
+
+                if let operation::Outcome::Chain(next_operation) = operation.finish() {
+                    current_operation = Some(next_operation)
+                }
+            }
         }
 
         // Fetch all external inputs.
