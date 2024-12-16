@@ -73,7 +73,7 @@ impl<T: EventProxy> mq::EventHandler for EventProxyWrapper<T> {
         
         let text = {
             match key.clone() {
-                keyboard::Key::Named(named) => None,
+                keyboard::Key::Named(_named) => None,
                 keyboard::Key::Character(c) => Some(c),
                 keyboard::Key::Unidentified => None,
             }

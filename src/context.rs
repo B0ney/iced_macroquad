@@ -1,6 +1,5 @@
 use std::sync::OnceLock;
 
-use iced_core::mouse::Interaction;
 use iced_core::{Font, Pixels, Size};
 use iced_graphics::Viewport;
 use iced_tiny_skia;
