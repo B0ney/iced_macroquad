@@ -3,16 +3,6 @@ name = "iced_macroquad"
 version = "0.1.0"
 edition = "2021"
 
-[workspace.dependencies]
-iced_core = { git = "https://github.com/B0ney/iced", branch = "0.13-base" }
-iced_graphics = { git = "https://github.com/B0ney/iced", branch = "0.13-base" }
-iced_widget = { git = "https://github.com/B0ney/iced", branch = "0.13-base" }
-iced_runtime = { git = "https://github.com/B0ney/iced", branch = "0.13-base" }
-iced_tiny_skia = { git = "https://github.com/B0ney/iced", branch = "0.13-base" }
-
-rustc-hash = "2.0.0"
-macroquad = "=0.4.13"
-
 [features]
 image = ["iced_widget/image", "iced_tiny_skia/image"]
 svg = ["iced_widget/svg", "iced_tiny_skia/svg"]
@@ -21,11 +11,12 @@ lazy = ["iced_widget/lazy"]
 advanced = ["iced_widget/advanced"]
 
 [dependencies]
-macroquad.workspace = true
-iced_graphics.workspace = true
-iced_core.workspace = true
-iced_widget.workspace = true
-iced_runtime.workspace = true
-iced_tiny_skia.workspace = true
+iced_core = { git = "https://github.com/B0ney/iced", branch = "micro-iced" }
+iced_graphics = { git = "https://github.com/B0ney/iced", branch = "micro-iced" }
+iced_widget = { git = "https://github.com/B0ney/iced", branch = "micro-iced" }
+iced_runtime = { git = "https://github.com/B0ney/iced", branch = "micro-iced" }
+iced_tiny_skia = { git = "https://github.com/B0ney/iced", branch = "micro-iced" }
+
+macroquad = { version = "=0.4.13", default-features = false }
 bytemuck = { version = "1.9", features = ["derive"] }
 tiny-skia = "0.11.4"

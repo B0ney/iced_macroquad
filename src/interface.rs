@@ -5,13 +5,10 @@ use iced_core::renderer::Style;
 use iced_core::widget::{operation, Operation};
 use iced_core::{Element, Point};
 
-use iced_runtime::futures::BoxStream;
 use iced_runtime::{user_interface::Cache, UserInterface};
-use iced_runtime::{Action, Task};
 
 use crate::cursor::CursorSubscriber;
 use crate::iced::Renderer;
-use crate::mq::CursorIcon;
 
 use crate::context::{global, Context, MqCursor};
 use crate::convert;
@@ -19,7 +16,6 @@ use crate::convert;
 pub struct Interface<Message, Theme = iced_core::Theme> {
     in_events: Vec<iced_core::Event>,
     operations: Vec<Box<dyn Operation>>,
-    widget_tasks: Vec<BoxStream<Action<()>>>, // HACK
     ui_cache: Option<Cache>,
     theme: Theme,
     interacted: bool,
@@ -41,7 +37,6 @@ impl<Message, Theme> Interface<Message, Theme> {
             interacted: false,
             _message: PhantomData,
             operations: Vec::new(),
-            widget_tasks: Vec::with_capacity(1),
         }
     }
 
@@ -52,16 +47,6 @@ impl<Message, Theme> Interface<Message, Theme> {
     /// Perform a widget operation
     pub fn operate(&mut self, operation: impl Operation + 'static) {
         self.operations.push(Box::new(operation));
-    }
-
-    /// Perform a widget operation that's behind a task.
-    /// Will not do anything if it's not an Operation.
-    ///
-    /// TODO: Very hacky
-    pub fn widget_task(&mut self, task: Task<()>) {
-        if let Some(stream) = iced_runtime::task::into_stream(task) {
-            self.widget_tasks.push(stream);
-        }
     }
 
     /// Interact with, and view the UI. All interactions will be pushed to messages.
@@ -98,21 +83,6 @@ impl<Message, Theme> Interface<Message, Theme> {
             self.ui_cache.take().unwrap_or_default(),
             &mut ctx.renderer,
         );
-
-        //
-        self.widget_tasks
-            .retain_mut(|stream| match poll_hacks::try_poll(stream) {
-                std::task::Poll::Ready(Some(action)) => {
-                    if let Action::Widget(operation) = action {
-                        self.operations.push(operation)
-                    } else {
-                        println!("unsupported task")
-                    }
-                    false
-                }
-                std::task::Poll::Ready(None) => false,
-                std::task::Poll::Pending => true,
-            });
 
         // Perform widget operations, if any.
         for operation in self.operations.drain(..) {
@@ -171,23 +141,5 @@ impl<Message, Theme> Drop for Interface<Message, Theme> {
         //         ctx.set_mouse_icon(CursorIcon::Default);
         //     })
         // }
-    }
-}
-
-mod poll_hacks {
-    use std::sync::Arc;
-    use std::task::{Context, Poll, Wake, Waker};
-
-    use iced_runtime::futures::futures::StreamExt;
-
-    struct NoopWake;
-
-    impl Wake for NoopWake {
-        fn wake(self: Arc<Self>) {}
-    }
-
-    pub fn try_poll<T>(mut stream: impl StreamExt<Item = T> + Unpin) -> Poll<Option<T>> {
-        let waker = Waker::from(Arc::new(NoopWake));
-        stream.poll_next_unpin(&mut Context::from_waker(&waker))
     }
 }
