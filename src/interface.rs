@@ -44,6 +44,11 @@ impl<Message, Theme> Interface<Message, Theme> {
         self.theme = theme
     }
 
+    /// Returns true if the interface was interacted with since the last view
+    pub fn interacted(&self) -> bool {
+        self.interacted
+    }
+
     /// Perform a widget operation
     pub fn operate(&mut self, operation: impl Operation + 'static) {
         self.operations.push(Box::new(operation));
