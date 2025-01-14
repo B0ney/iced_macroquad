@@ -1,5 +1,6 @@
 use std::marker::PhantomData;
 
+use iced_core::event::Status;
 use iced_core::mouse::{Cursor, Interaction};
 use iced_core::renderer::Style;
 use iced_core::widget::{operation, Operation};
@@ -19,6 +20,7 @@ pub struct Interface<Message, Theme = iced_core::Theme> {
     ui_cache: Option<Cache>,
     theme: Theme,
     interacted: bool,
+    captured: bool,
     _message: PhantomData<Message>,
 }
 
@@ -35,8 +37,9 @@ impl<Message, Theme> Interface<Message, Theme> {
             ui_cache: None,
             theme,
             interacted: false,
-            _message: PhantomData,
             operations: Vec::new(),
+            captured: false,
+            _message: PhantomData,
         }
     }
 
@@ -47,6 +50,11 @@ impl<Message, Theme> Interface<Message, Theme> {
     /// Returns true if the interface was interacted with since the last view
     pub fn interacted(&self) -> bool {
         self.interacted
+    }
+
+    /// Returns true if the interface has captured the cursor since the last view
+    pub fn captured(&self) -> bool {
+        self.captured
     }
 
     /// Perform a widget operation
@@ -108,7 +116,7 @@ impl<Message, Theme> Interface<Message, Theme> {
 
         // Update the interface by processing the events.
         let cursor = Cursor::Available(Point::from(ctx.mouse_position()));
-        let (_, _statuses) = interface.update(
+        let (_, statuses) = interface.update(
             &self.in_events,
             cursor,
             &mut ctx.renderer,
@@ -118,6 +126,10 @@ impl<Message, Theme> Interface<Message, Theme> {
 
         // Draw the interface onto the canvas.
         let interaction = interface.draw(&mut ctx.renderer, &self.theme, &Style::default(), cursor);
+
+        self.captured = statuses
+            .into_iter()
+            .any(|status| status == Status::Captured);
 
         // Update mouse cursor.
         if interaction == Interaction::None {
